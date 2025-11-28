@@ -1,0 +1,8 @@
+      PID    PPID    PGID     WINPID   TTY         UID    STIME COMMAND
+      285       1     285      25636  cons1     197609 12:27:59 /usr/bin/bash
+      240       1     240      38892  cons0     197609 12:25:53 /usr/bin/bash
+      515     426     515      24080  cons3     197609 15:12:31 /usr/bin/PS
+      356       1     356      17620  cons2     197609 13:38:14 /usr/bin/bash
+      412       1     412      34672  ?         197609 13:38:50 /usr/bin/sh
+      426       1     426      40828  cons3     197609 14:54:23 /usr/bin/bash
+      413     412     412      29224  ?         197609 13:38:50 /c/Users/ketul/AppData/Local/Programs/Kiro/Kiro
