@@ -35,7 +35,14 @@ cp .env.example .env.local
 # Edit .env.local with your Firebase credentials
 ```
 
-3. Run development server:
+3. (Optional) Enable test mode to bypass authentication:
+```bash
+# Add to .env.local:
+VITE_TEST_MODE=true
+```
+**Note:** Test mode bypasses authentication for testing purposes. Set to `false` or remove to require authentication.
+
+4. Run development server:
 ```bash
 npm run dev
 ```

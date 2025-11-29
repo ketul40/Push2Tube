@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import AuthenticationComponent from '@/components/AuthenticationComponent';
 import { onAuthStateChanged } from '@/services/authService';
 import { trackPageLoad } from '@/utils/performanceMonitoring';
+import { TEST_MODE } from '@/config/testMode';
 
 /**
  * Login Page
  * Displays authentication interface with futuristic animated background
  * Redirects to dashboard after successful login
+ * In test mode, automatically redirects to dashboard
  * Requirements: 1.1, 1.2, 1.4
  */
 const Login: React.FC = () => {
@@ -16,6 +18,12 @@ const Login: React.FC = () => {
   useEffect(() => {
     // Track page load performance
     trackPageLoad('login');
+    
+    // In test mode, automatically redirect to dashboard
+    if (TEST_MODE) {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
     
     const unsubscribe = onAuthStateChanged((currentUser) => {
       // Redirect to dashboard if already authenticated

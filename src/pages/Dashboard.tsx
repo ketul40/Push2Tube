@@ -12,6 +12,7 @@ import { JobStatus } from '@/types';
 import { trackPageLoad } from '@/utils/performanceMonitoring';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, TrendingUp, CheckCircle2, XCircle } from 'lucide-react';
+import { TEST_MODE, MOCK_USER } from '@/config/testMode';
 
 /**
  * Dashboard Page
@@ -21,8 +22,8 @@ import { Loader2, TrendingUp, CheckCircle2, XCircle } from 'lucide-react';
  */
 const Dashboard: React.FC = () => {
   const location = useLocation();
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<FirebaseUser | null>(TEST_MODE ? MOCK_USER as FirebaseUser : null);
+  const [loading, setLoading] = useState(!TEST_MODE);
   const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const [stats, setStats] = useState({
     total: 0,
@@ -33,6 +34,12 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     // Track page load performance
     trackPageLoad('dashboard');
+    
+    // In test mode, skip auth check
+    if (TEST_MODE) {
+      setLoading(false);
+      return;
+    }
     
     const unsubscribe = onAuthStateChanged((currentUser) => {
       setUser(currentUser);

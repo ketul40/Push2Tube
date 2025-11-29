@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { User as FirebaseUser } from 'firebase/auth';
 import { onAuthStateChanged } from '../services/authService';
+import { TEST_MODE } from '../config/testMode';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ interface ProtectedRouteProps {
  * ProtectedRoute Component
  * Wraps routes that require authentication
  * Redirects to login page if user is not authenticated
+ * In test mode, bypasses authentication check
  * Requirements: 1.4
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
@@ -18,6 +20,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // In test mode, skip auth check
+    if (TEST_MODE) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged((currentUser) => {
       setUser(currentUser);
       setLoading(false);
@@ -37,6 +45,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         <p>Loading...</p>
       </div>
     );
+  }
+
+  // In test mode, always allow access
+  if (TEST_MODE) {
+    return <>{children}</>;
   }
 
   if (!user) {

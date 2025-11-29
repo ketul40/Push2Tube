@@ -6,6 +6,7 @@ import JobHistoryComponent from '@/components/JobHistoryComponent';
 import { onAuthStateChanged } from '@/services/authService';
 import { trackPageLoad } from '@/utils/performanceMonitoring';
 import { Loader2 } from 'lucide-react';
+import { TEST_MODE, MOCK_USER } from '@/config/testMode';
 
 /**
  * History Page
@@ -14,12 +15,18 @@ import { Loader2 } from 'lucide-react';
  */
 const History: React.FC = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<FirebaseUser | null>(TEST_MODE ? MOCK_USER as FirebaseUser : null);
+  const [loading, setLoading] = useState(!TEST_MODE);
 
   useEffect(() => {
     // Track page load performance
     trackPageLoad('history');
+    
+    // In test mode, skip auth check
+    if (TEST_MODE) {
+      setLoading(false);
+      return;
+    }
     
     const unsubscribe = onAuthStateChanged((currentUser) => {
       setUser(currentUser);
