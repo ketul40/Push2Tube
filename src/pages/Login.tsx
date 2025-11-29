@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { User as FirebaseUser } from 'firebase/auth';
 import { signInWithGoogle, onAuthStateChanged, enableGuestMode } from '@/services/authService';
 import { parseFirebaseError } from '@/utils/errorHandler';
 import { trackPageLoad } from '@/utils/performanceMonitoring';
