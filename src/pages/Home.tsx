@@ -48,8 +48,8 @@ const Home: React.FC = () => {
     },
     {
       icon: Video,
-      title: 'Professional Quality',
-      description: 'Generate high-quality videos with stunning visuals and smooth animations',
+      title: 'Viral Short Clips',
+      description: 'Create engaging short-form videos optimized for YouTube Shorts that capture attention',
       color: 'text-neon-cyan'
     },
     {
@@ -130,17 +130,17 @@ const Home: React.FC = () => {
             <div className="space-y-4 sm:space-y-6 lg:space-y-8">
               <div className="inline-flex items-center justify-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-neon-green/10 border border-neon-green/30 mb-2 sm:mb-4">
                 <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-neon-green" />
-                <span className="text-xs sm:text-sm lg:text-base text-neon-green font-medium">AI-Powered Video Automation</span>
+                <span className="text-xs sm:text-sm lg:text-base text-neon-green font-medium">AI-Powered Short Video Creation</span>
               </div>
               
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 1440p:text-8xl font-bold leading-tight mx-auto px-2 sm:px-4">
                 <span className="text-white block">Transform Your Ideas Into</span>
-                <span className="text-glow-green text-neon-green block">Stunning Videos</span>
+                <span className="text-glow-green text-neon-green block">Viral YouTube Shorts</span>
                 <span className="text-white block">Instantly</span>
               </h1>
               
               <p className="text-base sm:text-lg lg:text-xl xl:text-2xl 1440p:text-3xl text-gray-300 max-w-xl sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                Create professional-quality videos from simple text prompts and automatically upload them to YouTube. 
+                Create short viral videos from simple text prompts and automatically upload them as YouTube Shorts. 
                 No video editing skills required.
               </p>
             </div>

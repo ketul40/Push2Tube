@@ -3,12 +3,13 @@ import { User as FirebaseUser } from 'firebase/auth';
 import { createVideoJob } from '@/services/videoJobService';
 import { getUserById, updateUserPreferences } from '@/services/userService';
 import { createErrorResponse, parseFirebaseError, ErrorCode } from '@/utils/errorHandler';
+import { getTrendingTopics, TrendingTopic } from '@/services/trendingTopicsService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Loader2, CheckCircle2, Lock, Globe, Eye } from 'lucide-react';
+import { Sparkles, Loader2, CheckCircle2, Lock, Globe, Eye, TrendingUp, X, Lightbulb } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PromptSubmissionComponentProps {
@@ -28,6 +29,9 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [defaultPrivacy, setDefaultPrivacy] = useState('unlisted');
+  const [showTrendingTopics, setShowTrendingTopics] = useState(true);
+  const [selectedTopic, setSelectedTopic] = useState<TrendingTopic | null>(null);
+  const [trendingTopics] = useState<TrendingTopic[]>(getTrendingTopics());
 
   const MAX_CHARS = 1000;
   const charCount = prompt.length;
@@ -65,6 +69,11 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
     const value = e.target.value;
     setPrompt(value);
     
+    // Clear selected topic if user manually edits
+    if (selectedTopic && value !== selectedTopic.prompt) {
+      setSelectedTopic(null);
+    }
+    
     // Clear validation error when user starts typing
     if (validationError && value.trim() !== '') {
       setValidationError(null);
@@ -74,6 +83,22 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
     if (submitSuccess) {
       setSubmitSuccess(false);
     }
+  };
+
+  // Handle topic selection
+  const handleTopicSelect = (topic: TrendingTopic) => {
+    setSelectedTopic(topic);
+    setPrompt(topic.prompt);
+    setShowTrendingTopics(false);
+    setValidationError(null);
+    toast.success(`Selected: ${topic.title}`);
+  };
+
+  // Clear selected topic and prompt
+  const handleClearSelection = () => {
+    setSelectedTopic(null);
+    setPrompt('');
+    setShowTrendingTopics(true);
   };
 
   // Handle privacy status change
@@ -119,6 +144,8 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
       
       // Clear form
       setPrompt('');
+      setSelectedTopic(null);
+      setShowTrendingTopics(true);
       setSubmitSuccess(true);
       toast.success('Video generation job created successfully!');
       
@@ -161,9 +188,9 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
             <Sparkles className="w-6 h-6 text-neon-green" />
           </div>
           <div>
-            <CardTitle className="text-xl">Generate AI Video</CardTitle>
+            <CardTitle className="text-xl">Create YouTube Short</CardTitle>
             <CardDescription>
-              Describe your video and let AI create it for you
+              Describe your short viral video and let AI create it for you
             </CardDescription>
           </div>
         </div>
@@ -171,6 +198,113 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
       
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Trending Topics Section */}
+          {showTrendingTopics && !selectedTopic && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="w-5 h-5 text-neon-cyan" />
+                  <label className="text-sm font-medium text-white">
+                    Trending Ideas for YouTube Shorts
+                  </label>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTrendingTopics(false)}
+                  className="text-xs text-gray-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                {trendingTopics.map((topic) => (
+                  <Card
+                    key={topic.id}
+                    className="glass border-white/10 hover:border-neon-green/50 transition-all duration-300 cursor-pointer group"
+                    onClick={() => handleTopicSelect(topic)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-xs border-neon-cyan/50 text-neon-cyan">
+                              {topic.category}
+                            </Badge>
+                            {topic.trending && (
+                              <Badge variant="outline" className="text-xs border-red-500/50 text-red-400">
+                                🔥 Trending
+                              </Badge>
+                            )}
+                          </div>
+                          <h4 className="text-sm font-semibold text-white mb-1 group-hover:text-neon-green transition-colors">
+                            {topic.title}
+                          </h4>
+                          <p className="text-xs text-gray-400 mb-2 line-clamp-2">
+                            {topic.description}
+                          </p>
+                        </div>
+                        <Lightbulb className="w-4 h-4 text-neon-green/50 group-hover:text-neon-green transition-colors flex-shrink-0 ml-2" />
+                      </div>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {topic.tags.slice(0, 3).map((tag, idx) => (
+                          <Badge
+                            key={idx}
+                            variant="outline"
+                            className="text-xs border-white/20 text-gray-400"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <div className="flex items-center justify-center pt-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTrendingTopics(false)}
+                  className="text-xs text-gray-400 hover:text-white"
+                >
+                  Or enter your own prompt
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Selected Topic Display */}
+          {selectedTopic && (
+            <div className="space-y-2 p-4 rounded-lg bg-neon-green/10 border border-neon-green/30">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline" className="text-xs border-neon-cyan/50 text-neon-cyan">
+                      {selectedTopic.category}
+                    </Badge>
+                    <span className="text-sm font-semibold text-white">{selectedTopic.title}</span>
+                  </div>
+                  <p className="text-xs text-gray-300 mb-2">{selectedTopic.description}</p>
+                  <p className="text-xs text-gray-400 italic">
+                    💡 You can modify the prompt below or use it as-is
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearSelection}
+                  className="text-gray-400 hover:text-white flex-shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Prompt Input */}
           <div className="space-y-2">
             <label htmlFor="prompt" className="text-sm font-medium text-white flex items-center justify-between">
@@ -189,7 +323,7 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
                 id="prompt"
                 value={prompt}
                 onChange={handlePromptChange}
-                placeholder="E.g., A serene sunset over a mountain lake with birds flying in the distance..."
+                placeholder={selectedTopic ? "Modify the prompt or use it as-is..." : "E.g., A cinematic time-lapse of a morning routine transformation with bright, energetic lighting..."}
                 rows={6}
                 maxLength={MAX_CHARS}
                 disabled={isSubmitting}
@@ -258,30 +392,43 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
             </p>
           </div>
 
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            disabled={isSubmitting || !prompt.trim()}
-            className="w-full h-12 bg-gradient-to-r from-neon-green to-neon-cyan hover:opacity-90 text-black font-bold text-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
-            size="lg"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Creating Job...
-              </>
-            ) : submitSuccess ? (
-              <>
-                <CheckCircle2 className="w-5 h-5 mr-2" />
-                Job Created!
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5 mr-2" />
-                Generate Video
-              </>
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {!showTrendingTopics && !selectedTopic && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowTrendingTopics(true)}
+                className="sm:w-auto border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10"
+              >
+                <TrendingUp className="w-4 h-4 mr-2" />
+                Browse Ideas
+              </Button>
             )}
-          </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting || !prompt.trim()}
+              className="flex-1 h-12 bg-gradient-to-r from-neon-green to-neon-cyan hover:opacity-90 text-black font-bold text-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
+              size="lg"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Creating Job...
+                </>
+              ) : submitSuccess ? (
+                <>
+                  <CheckCircle2 className="w-5 h-5 mr-2" />
+                  Job Created!
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Generate Short
+                </>
+              )}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

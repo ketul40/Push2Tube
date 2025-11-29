@@ -142,7 +142,7 @@ const Dashboard: React.FC = () => {
                 <span className="text-glow-green">Dashboard</span>
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground">
-                Create AI-powered videos and upload them to YouTube automatically
+                Create short viral videos and upload them as YouTube Shorts automatically
               </p>
             </div>
 

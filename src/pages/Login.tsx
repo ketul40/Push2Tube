@@ -67,7 +67,7 @@ const Login: React.FC = () => {
 
   const features = [
     { icon: Sparkles, text: 'AI-Powered Generation' },
-    { icon: Video, text: 'Professional Quality' },
+    { icon: Video, text: 'Viral Short Clips' },
     { icon: Zap, text: 'Lightning Fast' },
   ];
 
@@ -127,7 +127,7 @@ const Login: React.FC = () => {
               </div>
               
               <p className="text-base sm:text-lg lg:text-xl xl:text-2xl 1440p:text-3xl text-gray-300 max-w-md lg:max-w-lg xl:max-w-xl">
-                Create AI-powered videos and upload them to YouTube automatically
+                Create short viral videos and upload them as YouTube Shorts automatically
               </p>
             </div>
 

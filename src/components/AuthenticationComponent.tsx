@@ -88,10 +88,10 @@ const AuthenticationComponent: React.FC = () => {
               </div>
             </div>
             <CardDescription className="text-lg text-gray-300">
-              AI-Powered Video Automation
+              AI-Powered Short Video Creation
             </CardDescription>
             <p className="text-sm text-muted-foreground">
-              Sign in to start generating AI videos and uploading to YouTube
+              Sign in to start creating viral YouTube Shorts with AI
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
