@@ -11,7 +11,6 @@ import { getJobsByUserId } from '@/services/videoJobService';
 import { JobStatus } from '@/types';
 import { trackPageLoad } from '@/utils/performanceMonitoring';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Loader2, TrendingUp, CheckCircle2, XCircle } from 'lucide-react';
 
 /**

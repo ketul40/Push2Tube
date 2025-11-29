@@ -227,7 +227,7 @@ const JobMonitorComponent: React.FC<JobMonitorComponentProps> = ({ jobId }) => {
 
           {/* Pipeline Stages */}
           <div className="grid grid-cols-5 gap-2">
-            {stages.map((stage, index) => {
+            {stages.map((stage) => {
               const StageIcon = stage.icon;
               const isActive = progress >= stage.progress;
               const isCurrent = job.status === stage.status;

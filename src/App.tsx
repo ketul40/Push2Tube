@@ -25,18 +25,6 @@ function App() {
               border: '1px solid rgba(0, 255, 136, 0.3)',
             },
             className: 'glass',
-            success: {
-              iconTheme: {
-                primary: '#00ff88',
-                secondary: '#111111',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#f87171',
-                secondary: '#111111',
-              },
-            },
           }}
         />
         <Routes>
