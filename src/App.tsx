@@ -1,10 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import './App.css'
-import { ToastContainer } from './components/ErrorNotification'
-import ProtectedRoute from './components/ProtectedRoute'
-import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
-import History from './pages/History'
+import { ToastContainer } from '@/components/ErrorNotification'
+import ProtectedRoute from '@/components/ProtectedRoute'
+import Login from '@/pages/Login'
+import Dashboard from '@/pages/Dashboard'
+import History from '@/pages/History'
 
 /**
  * App Component
@@ -16,8 +15,30 @@ import History from './pages/History'
 function App() {
   return (
     <Router>
-      <div className="App">
-        <ToastContainer />
+      <div className="min-h-screen bg-[#0a0a0a] text-foreground custom-scrollbar">
+        <ToastContainer 
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: '#111111',
+              color: '#fff',
+              border: '1px solid rgba(0, 255, 136, 0.3)',
+            },
+            className: 'glass',
+            success: {
+              iconTheme: {
+                primary: '#00ff88',
+                secondary: '#111111',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#f87171',
+                secondary: '#111111',
+              },
+            },
+          }}
+        />
         <Routes>
           {/* Public route */}
           <Route path="/login" element={<Login />} />

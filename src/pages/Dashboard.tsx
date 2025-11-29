@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { User as FirebaseUser } from 'firebase/auth';
-import Navigation from '../components/Navigation';
-import YouTubeConnectionComponent from '../components/YouTubeConnectionComponent';
-import PromptSubmissionComponent from '../components/PromptSubmissionComponent';
-import JobMonitorComponent from '../components/JobMonitorComponent';
-import MetricsDashboard from '../components/MetricsDashboard';
-import { onAuthStateChanged } from '../services/authService';
-import { getJobsByUserId } from '../services/videoJobService';
-import { JobStatus } from '../types';
-import { trackPageLoad } from '../utils/performanceMonitoring';
-import './Dashboard.css';
+import Navigation from '@/components/Navigation';
+import YouTubeConnectionComponent from '@/components/YouTubeConnectionComponent';
+import PromptSubmissionComponent from '@/components/PromptSubmissionComponent';
+import JobMonitorComponent from '@/components/JobMonitorComponent';
+import MetricsDashboard from '@/components/MetricsDashboard';
+import { onAuthStateChanged } from '@/services/authService';
+import { getJobsByUserId } from '@/services/videoJobService';
+import { JobStatus } from '@/types';
+import { trackPageLoad } from '@/utils/performanceMonitoring';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, TrendingUp, CheckCircle2, XCircle } from 'lucide-react';
 
 /**
  * Dashboard Page
- * Main interface for video generation
+ * Main interface for video generation with responsive grid layout
  * Combines prompt submission, job monitoring, and YouTube connection
  * Requirements: 3.1, 6.5, 7.1
  */
@@ -82,10 +84,10 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="dashboard-page">
+      <div className="min-h-screen bg-[#0a0a0a]">
         <Navigation />
-        <div className="page-content">
-          <p>Loading...</p>
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[80vh]">
+          <Loader2 className="w-12 h-12 animate-spin text-neon-green" />
         </div>
       </div>
     );
@@ -96,33 +98,88 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="dashboard-page">
+    <div className="min-h-screen bg-[#0a0a0a] relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 grid-bg opacity-20"></div>
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-neon-cyan/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-neon-green/10 rounded-full blur-3xl"></div>
+      
       <Navigation />
-      <div className="page-content">
-        <div className="dashboard-header">
-          <h1>Dashboard</h1>
-          <div className="quick-stats">
-            <div className="stat-card">
-              <div className="stat-value">{stats.total}</div>
-              <div className="stat-label">Total Jobs</div>
+      
+      <div className="relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 animate-fade-in">
+          {/* Header with Stats */}
+          <div className="space-y-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                <span className="text-glow-green">Dashboard</span>
+              </h1>
+              <p className="text-muted-foreground">
+                Create AI-powered videos and upload them to YouTube automatically
+              </p>
             </div>
-            <div className="stat-card">
-              <div className="stat-value">{stats.completed}</div>
-              <div className="stat-label">Completed</div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-value">{stats.failed}</div>
-              <div className="stat-label">Failed</div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Card className="glass border-white/10 hover:border-neon-green/30 transition-all">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground uppercase tracking-wide">Total Jobs</p>
+                      <p className="text-3xl font-bold text-white mt-1">{stats.total}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-neon-cyan/10">
+                      <TrendingUp className="w-6 h-6 text-neon-cyan" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass border-white/10 hover:border-neon-green/30 transition-all">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground uppercase tracking-wide">Completed</p>
+                      <p className="text-3xl font-bold text-neon-green mt-1">{stats.completed}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-neon-green/10">
+                      <CheckCircle2 className="w-6 h-6 text-neon-green" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="glass border-white/10 hover:border-red-500/30 transition-all">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground uppercase tracking-wide">Failed</p>
+                      <p className="text-3xl font-bold text-red-400 mt-1">{stats.failed}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-red-400/10">
+                      <XCircle className="w-6 h-6 text-red-400" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </div>
 
-        <div className="dashboard-grid">
-          <div className="dashboard-main">
-            <YouTubeConnectionComponent user={user} />
-            <PromptSubmissionComponent user={user} onJobCreated={handleJobCreated} />
-            <JobMonitorComponent jobId={currentJobId} />
-            <MetricsDashboard user={user} />
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Main Actions */}
+            <div className="lg:col-span-2 space-y-6">
+              <YouTubeConnectionComponent user={user} />
+              <PromptSubmissionComponent user={user} onJobCreated={handleJobCreated} />
+              <JobMonitorComponent jobId={currentJobId} />
+            </div>
+
+            {/* Right Column - Analytics */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-20">
+                <MetricsDashboard user={user} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
