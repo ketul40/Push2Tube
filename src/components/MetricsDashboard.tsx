@@ -134,16 +134,16 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ user }) => {
   return (
     <div className="space-y-4">
       <Card className="glass border-white/10">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <CardHeader className="pb-4">
+          <div className="flex flex-col gap-3">
             <div>
-              <CardTitle>Analytics</CardTitle>
-              <CardDescription>Performance metrics and insights</CardDescription>
+              <CardTitle className="text-lg sm:text-xl">Analytics</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Performance metrics and insights</CardDescription>
             </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground">Time Range:</span>
+            <div className="flex items-center space-x-2 pt-1">
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">Time Range:</span>
               <Select value={timeRange} onValueChange={setTimeRange}>
-                <SelectTrigger className="w-[140px] bg-white/5 border-white/10">
+                <SelectTrigger className="w-full sm:w-[140px] bg-white/5 border-white/10 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-[#111111] border-white/20">
@@ -156,28 +156,28 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ user }) => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1">
             {metrics.map((metric, index) => {
               const Icon = metric.icon;
               return (
                 <Card
                   key={metric.title}
-                  className={`glass border ${metric.borderColor} hover:scale-105 transition-all duration-300 animate-fade-in`}
+                  className={`glass border ${metric.borderColor} hover:border-opacity-50 transition-all duration-300 animate-fade-in`}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <CardContent className="p-6 space-y-3">
+                  <CardContent className="p-4 sm:p-5 space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className={`p-2 rounded-lg ${metric.bgColor}`}>
+                      <div className={`p-2.5 rounded-lg ${metric.bgColor}`}>
                         <Icon className={`w-5 h-5 ${metric.color}`} />
                       </div>
                       {metric.title === 'Job Success Rate' && successRate >= 90 && (
-                        <Badge className="bg-neon-green/20 text-neon-green border-0">
+                        <Badge className="bg-neon-green/20 text-neon-green border-0 text-xs">
                           <CheckCircle2 className="w-3 h-3 mr-1" />
                           Excellent
                         </Badge>
                       )}
-                      {metric.title === 'Job Success Rate' && successRate < 70 && (
-                        <Badge className="bg-red-400/20 text-red-400 border-0">
+                      {metric.title === 'Job Success Rate' && successRate < 70 && successRate > 0 && (
+                        <Badge className="bg-red-400/20 text-red-400 border-0 text-xs">
                           <XCircle className="w-3 h-3 mr-1" />
                           Low
                         </Badge>
@@ -185,25 +185,25 @@ const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ user }) => {
                     </div>
                     
                     <div>
-                      <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                      <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                         {metric.title}
                       </p>
-                      <p className={`text-3xl font-bold ${metric.color} mt-1`}>
+                      <p className={`text-2xl sm:text-3xl font-bold ${metric.color}`}>
                         {metric.value}
                       </p>
                     </div>
                     
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
                       {metric.description}
                     </p>
 
                     {/* Progress bar for rates */}
                     {(metric.title.includes('Rate') || metric.title.includes('Success')) && (
-                      <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden mt-2">
                         <div
-                          className={`h-full ${metric.bgColor} transition-all duration-1000`}
+                          className={`h-full ${metric.bgColor} transition-all duration-1000 rounded-full`}
                           style={{
-                            width: `${parseFloat(metric.value)}%`,
+                            width: `${Math.min(parseFloat(metric.value) || 0, 100)}%`,
                           }}
                         />
                       </div>

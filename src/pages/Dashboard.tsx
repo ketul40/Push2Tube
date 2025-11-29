@@ -134,14 +134,14 @@ const Dashboard: React.FC = () => {
       <Navigation />
       
       <div className="relative z-10">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 animate-fade-in">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6 lg:py-8 space-y-6 lg:space-y-8 animate-fade-in">
           {/* Header with Stats */}
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-6">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                 <span className="text-glow-green">Dashboard</span>
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Create AI-powered videos and upload them to YouTube automatically
               </p>
             </div>
@@ -193,16 +193,16 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left Column - Main Actions */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-7 xl:col-span-8 space-y-6">
               <YouTubeConnectionComponent user={currentUser} />
               <PromptSubmissionComponent user={currentUser} onJobCreated={handleJobCreated} />
               <JobMonitorComponent jobId={currentJobId} />
             </div>
 
             {/* Right Column - Analytics */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-5 xl:col-span-4">
               <div className="sticky top-20">
                 <MetricsDashboard user={currentUser} />
               </div>

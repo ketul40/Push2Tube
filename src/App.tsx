@@ -16,7 +16,7 @@ import History from '@/pages/History'
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-[#0a0a0a] text-foreground custom-scrollbar">
+      <div className="min-h-screen text-foreground custom-scrollbar">
         <ToastContainer 
           position="top-right"
           toastOptions={{

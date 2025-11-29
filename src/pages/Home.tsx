@@ -70,9 +70,9 @@ const Home: React.FC = () => {
     <div className="min-h-screen relative overflow-hidden bg-[#0a0a0a]">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 grid-bg opacity-20"></div>
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-neon-green/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-neon-cyan/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-neon-purple/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute top-1/4 -left-20 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 xl:w-[500px] xl:h-[500px] 1440p:w-[600px] 1440p:h-[600px] bg-neon-green/20 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-1/4 -right-20 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 xl:w-[500px] xl:h-[500px] 1440p:w-[600px] 1440p:h-[600px] bg-neon-cyan/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[700px] sm:h-[700px] lg:w-[800px] lg:h-[800px] xl:w-[1000px] xl:h-[1000px] 1440p:w-[1200px] 1440p:h-[1200px] bg-neon-purple/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       
       {/* Floating Particles */}
       <div className="absolute inset-0 pointer-events-none">
@@ -93,29 +93,29 @@ const Home: React.FC = () => {
       {/* Content */}
       <div className="relative z-10">
         {/* Navigation */}
-        <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
+        <nav className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-4 sm:py-6 lg:py-8">
+          <div className="flex items-center justify-between max-w-[1200px] lg:max-w-[1400px] xl:max-w-[1600px] 1440p:max-w-[1800px] mx-auto">
             <div className="flex items-center space-x-2">
               <div className="relative">
                 <div className="absolute inset-0 bg-neon-green blur-2xl opacity-50"></div>
-                <h1 className="relative text-2xl font-bold">
+                <h1 className="relative text-xl sm:text-2xl lg:text-3xl font-bold whitespace-nowrap">
                   <span className="text-neon-green text-glow-green">PUSH</span>
                   <span className="text-neon-cyan text-glow-cyan">2</span>
                   <span className="text-white">TUBE</span>
                 </h1>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
               <Button
                 onClick={handleTryAsGuest}
                 variant="outline"
-                className="border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10 hidden sm:flex"
+                className="border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10 hidden sm:flex text-sm lg:text-base px-3 lg:px-4"
               >
                 Try as Guest
               </Button>
               <Button
                 onClick={handleSignIn}
-                className="bg-neon-green hover:bg-neon-green/80 text-black font-semibold"
+                className="bg-neon-green hover:bg-neon-green/80 text-black font-semibold text-sm sm:text-base px-4 lg:px-6"
               >
                 Sign In
               </Button>
@@ -124,52 +124,50 @@ const Home: React.FC = () => {
         </nav>
 
         {/* Hero Section */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
-          <div className="max-w-4xl mx-auto text-center space-y-8 animate-fade-in">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 sm:py-12 lg:py-16 xl:py-20 1440p:py-24">
+          <div className="max-w-4xl lg:max-w-5xl xl:max-w-6xl 1440p:max-w-7xl mx-auto text-center space-y-6 sm:space-y-8 lg:space-y-10 xl:space-y-12 animate-fade-in">
             {/* Main Heading */}
-            <div className="space-y-4">
-              <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-neon-green/10 border border-neon-green/30 mb-4">
-                <Sparkles className="w-4 h-4 text-neon-green" />
-                <span className="text-sm text-neon-green font-medium">AI-Powered Video Automation</span>
+            <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+              <div className="inline-flex items-center justify-center space-x-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-neon-green/10 border border-neon-green/30 mb-2 sm:mb-4">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-neon-green" />
+                <span className="text-xs sm:text-sm lg:text-base text-neon-green font-medium">AI-Powered Video Automation</span>
               </div>
               
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                <span className="text-white">Transform Your Ideas Into</span>
-                <br />
-                <span className="text-glow-green text-neon-green">Stunning Videos</span>
-                <br />
-                <span className="text-white">Instantly</span>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 1440p:text-8xl font-bold leading-tight mx-auto px-2 sm:px-4">
+                <span className="text-white block">Transform Your Ideas Into</span>
+                <span className="text-glow-green text-neon-green block">Stunning Videos</span>
+                <span className="text-white block">Instantly</span>
               </h1>
               
-              <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto mt-6">
+              <p className="text-base sm:text-lg lg:text-xl xl:text-2xl 1440p:text-3xl text-gray-300 max-w-xl sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 Create professional-quality videos from simple text prompts and automatically upload them to YouTube. 
                 No video editing skills required.
               </p>
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 lg:gap-6 pt-4 sm:pt-6 lg:pt-8">
               <Button
                 onClick={handleTryAsGuest}
                 size="lg"
-                className="w-full sm:w-auto bg-gradient-to-r from-neon-green to-neon-cyan hover:from-neon-green/90 hover:to-neon-cyan/90 text-black font-bold text-lg px-8 py-6 h-auto glow-green transition-all duration-300 hover:scale-105"
+                className="w-full sm:w-auto bg-gradient-to-r from-neon-green to-neon-cyan hover:from-neon-green/90 hover:to-neon-cyan/90 text-black font-bold text-base sm:text-lg lg:text-xl px-6 sm:px-8 lg:px-10 xl:px-12 py-4 sm:py-5 lg:py-6 xl:py-7 h-auto glow-green transition-all duration-300 hover:scale-105"
               >
-                <Play className="w-5 h-5 mr-2" />
+                <Play className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2" />
                 Try Free Now
               </Button>
               <Button
                 onClick={handleSignIn}
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto border-2 border-white/20 hover:border-neon-cyan/50 text-white hover:text-neon-cyan font-semibold text-lg px-8 py-6 h-auto transition-all duration-300 hover:scale-105"
+                className="w-full sm:w-auto border-2 border-white/20 hover:border-neon-cyan/50 text-white hover:text-neon-cyan font-semibold text-base sm:text-lg lg:text-xl px-6 sm:px-8 lg:px-10 xl:px-12 py-4 sm:py-5 lg:py-6 xl:py-7 h-auto transition-all duration-300 hover:scale-105"
               >
-                <Shield className="w-5 h-5 mr-2" />
+                <Shield className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2" />
                 Sign In with Google
               </Button>
             </div>
 
             {/* Trust Indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-6 pt-8 text-sm text-gray-400">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 lg:gap-6 xl:gap-8 pt-6 sm:pt-8 lg:pt-10 text-xs sm:text-sm lg:text-base text-gray-400 px-4">
               <div className="flex items-center space-x-2">
                 <Shield className="w-4 h-4 text-neon-green" />
                 <span>Secure & Private</span>
@@ -187,19 +185,19 @@ const Home: React.FC = () => {
         </div>
 
         {/* Features Section */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12 space-y-4">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-                Everything You Need to
-                <span className="text-glow-cyan text-neon-cyan"> Create & Share</span>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-12 sm:py-16 lg:py-20 xl:py-24 1440p:py-32">
+          <div className="max-w-6xl lg:max-w-7xl xl:max-w-8xl 1440p:max-w-[1800px] mx-auto">
+            <div className="text-center mb-8 sm:mb-12 lg:mb-16 xl:mb-20 space-y-3 sm:space-y-4 lg:space-y-6 px-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 1440p:text-7xl font-bold text-white">
+                Everything You Need to{' '}
+                <span className="text-glow-cyan text-neon-cyan">Create & Share</span>
               </h2>
-              <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+              <p className="text-sm sm:text-base lg:text-lg xl:text-xl 1440p:text-2xl text-gray-400 max-w-xl sm:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
                 Powerful features designed to make video creation effortless and enjoyable
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 xl:gap-10 px-4">
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
@@ -229,32 +227,32 @@ const Home: React.FC = () => {
         </div>
 
         {/* Final CTA Section */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-          <div className="max-w-4xl mx-auto">
-            <Card className="glass-strong border-neon-green/30 glow-green text-center">
-              <CardHeader className="space-y-4">
-                <CardTitle className="text-3xl sm:text-4xl font-bold text-white">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-12 sm:py-16 lg:py-20 xl:py-24 1440p:py-32">
+          <div className="max-w-4xl lg:max-w-5xl xl:max-w-6xl 1440p:max-w-7xl mx-auto px-4">
+            <Card className="glass-strong border-neon-green/30 glow-green text-center p-4 sm:p-6 lg:p-8 xl:p-10">
+              <CardHeader className="space-y-3 sm:space-y-4 lg:space-y-6">
+                <CardTitle className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl 1440p:text-6xl font-bold text-white">
                   Ready to Get Started?
                 </CardTitle>
-                <CardDescription className="text-lg text-gray-300">
+                <CardDescription className="text-sm sm:text-base lg:text-lg xl:text-xl 1440p:text-2xl text-gray-300">
                   Join thousands of creators who are already using Push2Tube to create amazing videos
                 </CardDescription>
               </CardHeader>
-              <CardContent className="pt-6">
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <CardContent className="pt-4 sm:pt-6 lg:pt-8">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 lg:gap-6">
                   <Button
                     onClick={handleTryAsGuest}
                     size="lg"
-                    className="w-full sm:w-auto bg-neon-green hover:bg-neon-green/80 text-black font-bold text-lg px-8 py-6 h-auto"
+                    className="w-full sm:w-auto bg-neon-green hover:bg-neon-green/80 text-black font-bold text-base sm:text-lg lg:text-xl px-6 sm:px-8 lg:px-10 xl:px-12 py-4 sm:py-5 lg:py-6 xl:py-7 h-auto"
                   >
                     Start Creating Now
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ml-2" />
                   </Button>
                   <Button
                     onClick={handleSignIn}
                     size="lg"
                     variant="outline"
-                    className="w-full sm:w-auto border-2 border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10 font-semibold text-lg px-8 py-6 h-auto"
+                    className="w-full sm:w-auto border-2 border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10 font-semibold text-base sm:text-lg lg:text-xl px-6 sm:px-8 lg:px-10 xl:px-12 py-4 sm:py-5 lg:py-6 xl:py-7 h-auto"
                   >
                     Sign In with Google
                   </Button>
@@ -265,8 +263,8 @@ const Home: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 border-t border-white/10">
-          <div className="text-center text-sm text-gray-500">
+        <footer className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6 sm:py-8 lg:py-10 border-t border-white/10">
+          <div className="max-w-[1200px] lg:max-w-[1400px] xl:max-w-[1600px] 1440p:max-w-[1800px] mx-auto text-center text-xs sm:text-sm lg:text-base text-gray-500">
             <p>© {new Date().getFullYear()} Push2Tube. All rights reserved.</p>
           </div>
         </footer>
