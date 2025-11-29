@@ -13,6 +13,7 @@ import { trackPageLoad } from '@/utils/performanceMonitoring';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, TrendingUp, CheckCircle2, XCircle } from 'lucide-react';
 import { TEST_MODE, MOCK_USER } from '@/config/testMode';
+import { isGuestMode } from '@/services/authService';
 
 /**
  * Dashboard Page
@@ -38,6 +39,18 @@ const Dashboard: React.FC = () => {
     // In test mode, skip auth check
     if (TEST_MODE) {
       setLoading(false);
+      return;
+    }
+
+    // Check if guest mode is enabled
+    if (isGuestMode()) {
+      setLoading(false);
+      // Create a guest user object for UI consistency
+      setUser({
+        uid: 'guest-user',
+        email: 'guest@push2tube.com',
+        displayName: 'Guest User',
+      } as FirebaseUser);
       return;
     }
     
@@ -99,9 +112,17 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  if (!user) {
+  if (!user && !isGuestMode()) {
     return null; // ProtectedRoute will handle redirect
   }
+
+  // At this point, user must be set (either authenticated or guest mode)
+  // Create a guaranteed non-null user object for components
+  const currentUser = user || ({
+    uid: 'guest-user',
+    email: 'guest@push2tube.com',
+    displayName: 'Guest User',
+  } as FirebaseUser);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] relative overflow-hidden">
@@ -175,15 +196,15 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Main Actions */}
             <div className="lg:col-span-2 space-y-6">
-              <YouTubeConnectionComponent user={user} />
-              <PromptSubmissionComponent user={user} onJobCreated={handleJobCreated} />
+              <YouTubeConnectionComponent user={currentUser} />
+              <PromptSubmissionComponent user={currentUser} onJobCreated={handleJobCreated} />
               <JobMonitorComponent jobId={currentJobId} />
             </div>
 
             {/* Right Column - Analytics */}
             <div className="lg:col-span-1">
               <div className="sticky top-20">
-                <MetricsDashboard user={user} />
+                <MetricsDashboard user={currentUser} />
               </div>
             </div>
           </div>

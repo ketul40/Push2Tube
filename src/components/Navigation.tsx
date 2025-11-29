@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Home, History, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { signOut } from '@/services/authService';
+import { Badge } from '@/components/ui/badge';
+import { signOutWithGuestMode, isGuestMode } from '@/services/authService';
 import { cn } from '@/lib/utils';
 
 /**
@@ -11,7 +12,9 @@ import { cn } from '@/lib/utils';
  */
 const Navigation: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const guestMode = isGuestMode();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -19,7 +22,8 @@ const Navigation: React.FC = () => {
 
   const handleSignOut = async () => {
     try {
-      await signOut();
+      await signOutWithGuestMode();
+      navigate('/');
     } catch (error) {
       console.error('Sign out error:', error);
     }
@@ -51,6 +55,11 @@ const Navigation: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-4">
+            {guestMode && (
+              <Badge variant="outline" className="border-neon-cyan/50 text-neon-cyan bg-neon-cyan/10">
+                Guest Mode
+              </Badge>
+            )}
             {navLinks.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
@@ -73,7 +82,7 @@ const Navigation: React.FC = () => {
               className="flex items-center space-x-2 text-gray-300 hover:text-red-400 hover:bg-red-500/10"
             >
               <LogOut className="w-4 h-4" />
-              <span>Sign Out</span>
+              <span>{guestMode ? 'Exit Guest Mode' : 'Sign Out'}</span>
             </Button>
           </div>
 
@@ -96,6 +105,13 @@ const Navigation: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-white/10 glass-strong animate-fade-in">
           <div className="container mx-auto px-4 py-4 space-y-2">
+            {guestMode && (
+              <div className="px-4 py-2">
+                <Badge variant="outline" className="border-neon-cyan/50 text-neon-cyan bg-neon-cyan/10">
+                  Guest Mode
+                </Badge>
+              </div>
+            )}
             {navLinks.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
@@ -120,7 +136,7 @@ const Navigation: React.FC = () => {
               className="flex w-full items-center space-x-3 px-4 py-3 rounded-lg font-medium text-gray-300 hover:text-red-400 hover:bg-red-500/10 transition-all"
             >
               <LogOut className="w-5 h-5" />
-              <span>Sign Out</span>
+              <span>{guestMode ? 'Exit Guest Mode' : 'Sign Out'}</span>
             </button>
           </div>
         </div>

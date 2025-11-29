@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { User as FirebaseUser } from 'firebase/auth';
-import { onAuthStateChanged } from '../services/authService';
+import { onAuthStateChanged, isGuestMode } from '../services/authService';
 import { TEST_MODE } from '../config/testMode';
 
 interface ProtectedRouteProps {
@@ -22,6 +22,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   useEffect(() => {
     // In test mode, skip auth check
     if (TEST_MODE) {
+      setLoading(false);
+      return;
+    }
+
+    // Check if guest mode is enabled
+    if (isGuestMode()) {
       setLoading(false);
       return;
     }
@@ -49,6 +55,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   // In test mode, always allow access
   if (TEST_MODE) {
+    return <>{children}</>;
+  }
+
+  // Allow access if guest mode is enabled
+  if (isGuestMode()) {
     return <>{children}</>;
   }
 

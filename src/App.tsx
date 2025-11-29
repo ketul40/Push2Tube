@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { ToastContainer } from '@/components/ErrorNotification'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import Home from '@/pages/Home'
 import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
 import History from '@/pages/History'
@@ -28,7 +29,8 @@ function App() {
           }}
         />
         <Routes>
-          {/* Public route */}
+          {/* Public routes */}
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           
           {/* Protected routes */}
@@ -49,11 +51,8 @@ function App() {
             } 
           />
           
-          {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
           {/* Catch-all redirect */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </Router>

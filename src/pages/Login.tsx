@@ -4,6 +4,7 @@ import AuthenticationComponent from '@/components/AuthenticationComponent';
 import { onAuthStateChanged } from '@/services/authService';
 import { trackPageLoad } from '@/utils/performanceMonitoring';
 import { TEST_MODE } from '@/config/testMode';
+import { isGuestMode } from '@/services/authService';
 
 /**
  * Login Page
@@ -21,6 +22,12 @@ const Login: React.FC = () => {
     
     // In test mode, automatically redirect to dashboard
     if (TEST_MODE) {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+
+    // Redirect if already in guest mode
+    if (isGuestMode()) {
       navigate('/dashboard', { replace: true });
       return;
     }

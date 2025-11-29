@@ -65,3 +65,45 @@ export const onAuthStateChanged = (
 export const getCurrentUser = (): FirebaseUser | null => {
   return auth.currentUser;
 };
+
+/**
+ * Guest Mode Functions
+ * Allow users to try the app without authentication
+ */
+
+const GUEST_MODE_KEY = 'guestMode';
+
+/**
+ * Enable guest mode (bypass authentication)
+ */
+export const enableGuestMode = (): void => {
+  localStorage.setItem(GUEST_MODE_KEY, 'true');
+};
+
+/**
+ * Disable guest mode
+ */
+export const disableGuestMode = (): void => {
+  localStorage.removeItem(GUEST_MODE_KEY);
+};
+
+/**
+ * Check if guest mode is enabled
+ * @returns true if guest mode is active, false otherwise
+ */
+export const isGuestMode = (): boolean => {
+  return localStorage.getItem(GUEST_MODE_KEY) === 'true';
+};
+
+/**
+ * Sign out including clearing guest mode
+ */
+export const signOutWithGuestMode = async (): Promise<void> => {
+  try {
+    await signOut();
+    disableGuestMode();
+  } catch (error) {
+    console.error('Error signing out:', error);
+    throw error;
+  }
+};

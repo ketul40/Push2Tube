@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { User as FirebaseUser } from 'firebase/auth';
-import { signInWithGoogle, signOut, onAuthStateChanged } from '@/services/authService';
+import { signInWithGoogle, signOut, onAuthStateChanged, enableGuestMode } from '@/services/authService';
 import { parseFirebaseError } from '@/utils/errorHandler';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Play } from 'lucide-react';
 import { toast } from 'sonner';
 
 /**
@@ -15,6 +16,7 @@ import { toast } from 'sonner';
  * Displays login UI when not authenticated, user profile when authenticated
  */
 const AuthenticationComponent: React.FC = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [signing, setSigning] = useState(false);
@@ -53,6 +55,12 @@ const AuthenticationComponent: React.FC = () => {
       const errorResponse = parseFirebaseError(err);
       toast.error(errorResponse.message);
     }
+  };
+
+  const handleTryAsGuest = () => {
+    enableGuestMode();
+    navigate('/dashboard');
+    toast.success('Welcome! You are now in guest mode');
   };
 
   if (loading) {
@@ -109,6 +117,25 @@ const AuthenticationComponent: React.FC = () => {
                   Sign in with Google
                 </>
               )}
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-white/10"></span>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or</span>
+              </div>
+            </div>
+
+            <Button
+              onClick={handleTryAsGuest}
+              variant="outline"
+              className="w-full h-12 border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10 hover:border-neon-cyan font-semibold transition-all duration-300 hover:scale-105"
+              size="lg"
+            >
+              <Play className="w-5 h-5 mr-2" />
+              Try as Guest
             </Button>
             
             <div className="text-center text-xs text-muted-foreground">
