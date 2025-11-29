@@ -3,6 +3,7 @@
  */
 
 import {Timestamp} from "firebase-admin/firestore";
+import {SubscriptionPlan, SubscriptionStatus} from "./subscription";
 
 /**
  * Job status enum matching frontend
@@ -64,6 +65,16 @@ export interface User {
   defaultPrivacyStatus: string;
   createdAt: Timestamp;
   lastLoginAt: Timestamp;
+  
+  // Subscription fields
+  subscriptionPlan: SubscriptionPlan;
+  subscriptionStatus: SubscriptionStatus;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  currentPeriodStart?: Timestamp;
+  currentPeriodEnd?: Timestamp;
+  videosUsedThisMonth: number;
+  videoQuota: number;
 }
 
 /**

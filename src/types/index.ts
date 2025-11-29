@@ -1,5 +1,7 @@
 // Core type definitions for Push2Tube
 
+import { SubscriptionPlan, SubscriptionStatus } from './subscription';
+
 export enum JobStatus {
   PENDING = 'pending',
   GENERATING_VIDEO = 'generating_video',
@@ -21,6 +23,16 @@ export interface User {
   defaultPrivacyStatus: string;
   createdAt: Date;
   lastLoginAt: Date;
+  
+  // Subscription fields
+  subscriptionPlan: SubscriptionPlan;
+  subscriptionStatus: SubscriptionStatus;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  currentPeriodStart?: Date;
+  currentPeriodEnd?: Date;
+  videosUsedThisMonth: number;
+  videoQuota: number;
 }
 
 export interface VideoJob {

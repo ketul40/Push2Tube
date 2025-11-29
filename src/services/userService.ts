@@ -1,6 +1,7 @@
 import { db } from '../config/firebase';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { User } from '../types';
+import { SubscriptionPlan, SubscriptionStatus } from '../types/subscription';
 
 /**
  * Create or update a user document in Firestore
@@ -39,6 +40,14 @@ export async function createOrUpdateUser(
       defaultPrivacyStatus: data!.defaultPrivacyStatus,
       createdAt: data!.createdAt.toDate(),
       lastLoginAt: now,
+      subscriptionPlan: (data?.subscriptionPlan as SubscriptionPlan) || SubscriptionPlan.FREE,
+      subscriptionStatus: (data?.subscriptionStatus as SubscriptionStatus) || SubscriptionStatus.NONE,
+      stripeCustomerId: data?.stripeCustomerId,
+      stripeSubscriptionId: data?.stripeSubscriptionId,
+      currentPeriodStart: data?.currentPeriodStart?.toDate(),
+      currentPeriodEnd: data?.currentPeriodEnd?.toDate(),
+      videosUsedThisMonth: data?.videosUsedThisMonth || 0,
+      videoQuota: data?.videoQuota || 2,
     };
   } else {
     // Create new user
@@ -50,6 +59,10 @@ export async function createOrUpdateUser(
       defaultPrivacyStatus: 'unlisted',
       createdAt: serverTimestamp(),
       lastLoginAt: serverTimestamp(),
+      subscriptionPlan: SubscriptionPlan.FREE,
+      subscriptionStatus: SubscriptionStatus.NONE,
+      videosUsedThisMonth: 0,
+      videoQuota: 2,
     };
 
     await setDoc(userRef, newUser);
@@ -62,6 +75,10 @@ export async function createOrUpdateUser(
       defaultPrivacyStatus: 'unlisted',
       createdAt: now,
       lastLoginAt: now,
+      subscriptionPlan: SubscriptionPlan.FREE,
+      subscriptionStatus: SubscriptionStatus.NONE,
+      videosUsedThisMonth: 0,
+      videoQuota: 2,
     };
   }
 }
@@ -92,6 +109,14 @@ export async function getUserById(uid: string): Promise<User | null> {
     defaultPrivacyStatus: data.defaultPrivacyStatus,
     createdAt: data.createdAt.toDate(),
     lastLoginAt: data.lastLoginAt.toDate(),
+    subscriptionPlan: (data.subscriptionPlan as SubscriptionPlan) || SubscriptionPlan.FREE,
+    subscriptionStatus: (data.subscriptionStatus as SubscriptionStatus) || SubscriptionStatus.NONE,
+    stripeCustomerId: data?.stripeCustomerId,
+    stripeSubscriptionId: data?.stripeSubscriptionId,
+    currentPeriodStart: data?.currentPeriodStart?.toDate(),
+    currentPeriodEnd: data?.currentPeriodEnd?.toDate(),
+    videosUsedThisMonth: data?.videosUsedThisMonth || 0,
+    videoQuota: data?.videoQuota || 2,
   };
 }
 

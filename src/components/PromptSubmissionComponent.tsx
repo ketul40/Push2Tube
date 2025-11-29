@@ -4,13 +4,15 @@ import { createVideoJob } from '@/services/videoJobService';
 import { getUserById, updateUserPreferences } from '@/services/userService';
 import { createErrorResponse, parseFirebaseError, ErrorCode } from '@/utils/errorHandler';
 import { getTrendingTopics, TrendingTopic } from '@/services/trendingTopicsService';
+import { getRemainingQuota } from '@/services/subscriptionService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Loader2, CheckCircle2, Lock, Globe, Eye, TrendingUp, X, Lightbulb } from 'lucide-react';
+import { Sparkles, Loader2, CheckCircle2, Lock, Globe, Eye, TrendingUp, X, Lightbulb, Video, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface PromptSubmissionComponentProps {
   user: FirebaseUser;
@@ -23,6 +25,7 @@ interface PromptSubmissionComponentProps {
  * Requirements: 3.1, 3.2, 10.1, 10.2, 10.4, 10.5
  */
 const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ user, onJobCreated }) => {
+  const navigate = useNavigate();
   const [prompt, setPrompt] = useState('');
   const [privacyStatus, setPrivacyStatus] = useState('unlisted');
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -32,12 +35,18 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
   const [showTrendingTopics, setShowTrendingTopics] = useState(true);
   const [selectedTopic, setSelectedTopic] = useState<TrendingTopic | null>(null);
   const [trendingTopics] = useState<TrendingTopic[]>(getTrendingTopics());
+  const [quotaStatus, setQuotaStatus] = useState<{
+    remaining: number;
+    used: number;
+    quota: number;
+    hasQuota: boolean;
+  } | null>(null);
 
   const MAX_CHARS = 1000;
   const charCount = prompt.length;
   const charPercentage = (charCount / MAX_CHARS) * 100;
 
-  // Load user's default privacy preference on mount
+  // Load user's default privacy preference and quota on mount
   useEffect(() => {
     const loadUserPreferences = async () => {
       try {
@@ -51,7 +60,22 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
       }
     };
 
+    const loadQuota = async () => {
+      try {
+        const quota = await getRemainingQuota(user.uid);
+        setQuotaStatus({
+          remaining: quota.remaining,
+          used: quota.used,
+          quota: quota.quota,
+          hasQuota: quota.hasQuota,
+        });
+      } catch (error) {
+        console.error('Error loading quota:', error);
+      }
+    };
+
     loadUserPreferences();
+    loadQuota();
   }, [user.uid]);
 
   // Validate prompt (non-empty check)
@@ -392,6 +416,44 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
             </p>
           </div>
 
+          {/* Quota Display */}
+          {quotaStatus && (
+            <div className={`p-4 rounded-lg border ${
+              quotaStatus.hasQuota 
+                ? 'bg-neon-green/10 border-neon-green/30' 
+                : 'bg-red-500/10 border-red-500/30'
+            }`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Video className={`w-5 h-5 ${quotaStatus.hasQuota ? 'text-neon-green' : 'text-red-400'}`} />
+                  <span className={`text-sm font-medium ${quotaStatus.hasQuota ? 'text-neon-green' : 'text-red-400'}`}>
+                    {quotaStatus.hasQuota 
+                      ? `${quotaStatus.remaining} video${quotaStatus.remaining !== 1 ? 's' : ''} remaining this month`
+                      : 'Video quota exceeded'}
+                  </span>
+                </div>
+                <span className="text-xs text-gray-400">
+                  {quotaStatus.used} / {quotaStatus.quota} used
+                </span>
+              </div>
+              {!quotaStatus.hasQuota && (
+                <div className="mt-2 flex items-center space-x-2 text-sm text-red-400">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>Upgrade your plan to create more videos or wait until next month.</span>
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    className="text-neon-cyan hover:text-neon-green p-0 h-auto"
+                    onClick={() => navigate('/pricing')}
+                  >
+                    Upgrade Now
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3">
             {!showTrendingTopics && !selectedTopic && (
@@ -407,7 +469,7 @@ const PromptSubmissionComponent: React.FC<PromptSubmissionComponentProps> = ({ u
             )}
             <Button
               type="submit"
-              disabled={isSubmitting || !prompt.trim()}
+              disabled={isSubmitting || !prompt.trim() || !!(quotaStatus && !quotaStatus.hasQuota)}
               className="flex-1 h-12 bg-gradient-to-r from-neon-green to-neon-cyan hover:opacity-90 text-black font-bold text-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100"
               size="lg"
             >

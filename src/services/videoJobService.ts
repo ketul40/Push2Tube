@@ -14,6 +14,7 @@ import {
 } from 'firebase/firestore';
 import { VideoJob, JobStatus } from '../types';
 import { trackAPICall } from '../utils/performanceMonitoring';
+import { getUserById } from './userService';
 
 /**
  * Create a new video job in Firestore
@@ -31,6 +32,19 @@ export async function createVideoJob(
     // Validate prompt is non-empty
     if (!prompt || prompt.trim() === '') {
       throw new Error('Prompt cannot be empty');
+    }
+
+    // Check video quota before creating job
+    const user = await getUserById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const remainingQuota = user.videoQuota - user.videosUsedThisMonth;
+    if (remainingQuota <= 0) {
+      throw new Error(
+        `Video quota exceeded. You have used ${user.videosUsedThisMonth}/${user.videoQuota} videos this month. Please upgrade your plan or wait for next month.`
+      );
     }
 
     const jobsCollection = collection(db, 'videoJobs');

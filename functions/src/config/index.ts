@@ -19,6 +19,14 @@ export interface Config {
 
   // Security
   tokenEncryptionKey: string;
+
+  // Stripe
+  stripeSecretKey: string;
+  stripeWebhookSecret: string;
+  stripePriceIdStarter: string;
+  stripePriceIdPro: string;
+  stripePriceIdUltra: string;
+  stripePublishableKey?: string; // For frontend reference
 }
 
 /**
@@ -39,9 +47,16 @@ export function loadConfig(): Config {
     videoStorageExpiryHours: parseInt(process.env.VIDEO_STORAGE_EXPIRY_HOURS || "24", 10),
 
     tokenEncryptionKey: process.env.TOKEN_ENCRYPTION_KEY || "",
+
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY || "",
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET || "",
+    stripePriceIdStarter: process.env.STRIPE_PRICE_ID_STARTER || "",
+    stripePriceIdPro: process.env.STRIPE_PRICE_ID_PRO || "",
+    stripePriceIdUltra: process.env.STRIPE_PRICE_ID_ULTRA || "",
+    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
   };
 
-  // Validate required fields
+  // Validate required fields (Stripe fields are optional for backwards compatibility during setup)
   const requiredFields: (keyof Config)[] = [
     "openaiApiKey",
     "youtubeClientId",

@@ -13,6 +13,8 @@ export * from "./helpers/storage";
 export * from "./helpers/metadataGeneration";
 export * from "./helpers/jobProcessing";
 export * from "./helpers/youtubeAuth";
+export * from "./helpers/stripe";
+export * from "./helpers/quota";
 
 // Export Cloud Functions
 export * from "./youtubeOAuth";
@@ -24,6 +26,9 @@ import {uploadToStorage, deleteFromStorage} from "./helpers/storage";
 import {processMetadataGeneration, processYouTubeUpload, updateJobStatus, updateJobError} from "./helpers/jobProcessing";
 import {authenticateRequest} from "./middleware/auth";
 import {createLogger} from "./utils/logger";
+import {checkUserQuota} from "./helpers/quota";
+import {incrementVideoUsage} from "./helpers/stripe";
+import {getConfig} from "./config";
 
 const logger = createLogger("CloudFunctions");
 
@@ -50,6 +55,19 @@ export const processVideoJob = functions.firestore
     });
 
     try {
+      // Check video quota before processing
+      const quotaStatus = await checkUserQuota(job.userId);
+      if (!quotaStatus.hasQuota) {
+        const errorMessage = `Video quota exceeded. You have used ${quotaStatus.used}/${quotaStatus.quota} videos this month. Please upgrade your plan or wait for next month.`;
+        logger.warn("Video quota exceeded", {
+          jobId,
+          userId: job.userId,
+          quotaStatus,
+        });
+        await updateJobError(jobId, errorMessage);
+        return;
+      }
+
       // Step 1: Generate video with Sora (Requirements: 3.3, 6.2)
       logger.info("Step 1: Generating video", {jobId});
       await updateJobStatus(jobId, JobStatus.GENERATING_VIDEO);
@@ -83,6 +101,9 @@ export const processVideoJob = functions.firestore
       // Step 4: Upload to YouTube (Requirements: 6.4)
       logger.info("Step 4: Uploading to YouTube", {jobId});
       await processYouTubeUpload(jobId);
+
+      // Increment video usage counter after successful completion
+      await incrementVideoUsage(job.userId);
 
       logger.info("Video job completed successfully", {jobId});
     } catch (error) {
@@ -398,5 +419,461 @@ export const monitorErrorRate = functions.pubsub
     } catch (error) {
       logger.error("Error monitoring check failed", {error});
       return null;
+    }
+  });
+
+/**
+ * Cloud Function: createCheckoutSession
+ * Creates a Stripe Checkout session for subscription payments
+ * Returns session URL for redirect
+ */
+export const createCheckoutSession = functions.https.onRequest(
+  async (request, response) => {
+    // Set CORS headers
+    response.set("Access-Control-Allow-Origin", "*");
+    response.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+    response.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+
+    // Handle preflight request
+    if (request.method === "OPTIONS") {
+      response.status(204).send("");
+      return;
+    }
+
+    // Only allow POST requests
+    if (request.method !== "POST") {
+      const errorResponse: ErrorResponse = {
+        code: "METHOD_NOT_ALLOWED",
+        message: "Only POST requests are allowed",
+        retryable: false,
+        timestamp: Date.now(),
+      };
+      response.status(405).json(errorResponse);
+      return;
+    }
+
+    // Authenticate request
+    await authenticateRequest(request, response, async (authContext) => {
+      try {
+        const { planName } = request.body;
+
+        if (!planName || typeof planName !== "string") {
+          const errorResponse: ErrorResponse = {
+            code: "INVALID_PAYLOAD",
+            message: "Missing or invalid 'planName' field",
+            retryable: false,
+            timestamp: Date.now(),
+          };
+          response.status(400).json(errorResponse);
+          return;
+        }
+
+        // Get plan details
+        const { getOrCreateCustomer, getPlanDetails, initializeStripe } =
+          await import("./helpers/stripe");
+        const planDetails = getPlanDetails(planName);
+
+        if (!planDetails.priceId) {
+          // Free plan doesn't require payment
+          const errorResponse: ErrorResponse = {
+            code: "INVALID_PLAN",
+            message: "Free plan does not require checkout",
+            retryable: false,
+            timestamp: Date.now(),
+          };
+          response.status(400).json(errorResponse);
+          return;
+        }
+
+        // Get or create Stripe customer
+        const customerId = await getOrCreateCustomer(
+          authContext.userId,
+          authContext.email || ""
+        );
+
+        // Create checkout session
+        const stripe = initializeStripe();
+
+        // Get the frontend URL from request or use default
+        const origin = request.headers.origin || "http://localhost:5173";
+        const successUrl = `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`;
+        const cancelUrl = `${origin}/pricing?canceled=true`;
+
+        const session = await stripe.checkout.sessions.create({
+          customer: customerId,
+          payment_method_types: ["card"],
+          line_items: [
+            {
+              price: planDetails.priceId,
+              quantity: 1,
+            },
+          ],
+          mode: "subscription",
+          success_url: successUrl,
+          cancel_url: cancelUrl,
+          metadata: {
+            firebaseUserId: authContext.userId,
+            planName: planName,
+          },
+        });
+
+        logger.info("Created checkout session", {
+          userId: authContext.userId,
+          sessionId: session.id,
+          planName,
+        });
+
+        response.status(200).json({
+          sessionId: session.id,
+          url: session.url,
+        });
+      } catch (error) {
+        logger.error("Failed to create checkout session", {
+          error: error instanceof Error ? error.message : "Unknown error",
+          userId: authContext.userId,
+        });
+
+        const errorResponse: ErrorResponse = {
+          code: "CHECKOUT_FAILED",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to create checkout session",
+          retryable: true,
+          timestamp: Date.now(),
+        };
+
+        response.status(500).json(errorResponse);
+      }
+    });
+  }
+);
+
+/**
+ * Cloud Function: createPortalSession
+ * Creates a Stripe Customer Portal session for managing subscriptions
+ */
+export const createPortalSession = functions.https.onRequest(
+  async (request, response) => {
+    // Set CORS headers
+    response.set("Access-Control-Allow-Origin", "*");
+    response.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+    response.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+
+    // Handle preflight request
+    if (request.method === "OPTIONS") {
+      response.status(204).send("");
+      return;
+    }
+
+    // Only allow POST requests
+    if (request.method !== "POST") {
+      const errorResponse: ErrorResponse = {
+        code: "METHOD_NOT_ALLOWED",
+        message: "Only POST requests are allowed",
+        retryable: false,
+        timestamp: Date.now(),
+      };
+      response.status(405).json(errorResponse);
+      return;
+    }
+
+    // Authenticate request
+    await authenticateRequest(request, response, async (authContext) => {
+      try {
+        const { getOrCreateCustomer, initializeStripe } = await import(
+          "./helpers/stripe"
+        );
+
+        // Get or create Stripe customer
+        const customerId = await getOrCreateCustomer(
+          authContext.userId,
+          authContext.email || ""
+        );
+
+        // Create portal session
+        const stripe = initializeStripe();
+        const origin = request.headers.origin || "http://localhost:5173";
+        const returnUrl = `${origin}/dashboard`;
+
+        const session = await stripe.billingPortal.sessions.create({
+          customer: customerId,
+          return_url: returnUrl,
+        });
+
+        logger.info("Created portal session", {
+          userId: authContext.userId,
+          sessionId: session.id,
+        });
+
+        response.status(200).json({
+          url: session.url,
+        });
+      } catch (error) {
+        logger.error("Failed to create portal session", {
+          error: error instanceof Error ? error.message : "Unknown error",
+          userId: authContext.userId,
+        });
+
+        const errorResponse: ErrorResponse = {
+          code: "PORTAL_FAILED",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to create portal session",
+          retryable: true,
+          timestamp: Date.now(),
+        };
+
+        response.status(500).json(errorResponse);
+      }
+    });
+  }
+);
+
+/**
+ * Cloud Function: stripeWebhook
+ * Handles Stripe webhook events for subscription updates
+ */
+export const stripeWebhook = functions.https.onRequest(
+  async (request, response) => {
+    const { initializeStripe, getPlanDetails } = await import(
+      "./helpers/stripe"
+    );
+    const stripe = initializeStripe();
+    const config = getConfig();
+
+    const sig = request.headers["stripe-signature"];
+
+    if (!sig) {
+      logger.error("Missing Stripe signature header");
+      response.status(400).send("Missing signature");
+      return;
+    }
+
+    let event;
+
+    try {
+      // For webhooks, we need the raw body
+      const rawBody = typeof request.body === 'string' 
+        ? request.body 
+        : JSON.stringify(request.body);
+      
+      event = stripe.webhooks.constructEvent(
+        rawBody,
+        sig,
+        config.stripeWebhookSecret
+      );
+    } catch (err) {
+      logger.error("Webhook signature verification failed", {
+        error: err instanceof Error ? err.message : "Unknown error",
+      });
+      response.status(400).send(`Webhook Error: ${err instanceof Error ? err.message : "Unknown error"}`);
+      return;
+    }
+
+    logger.info("Processing Stripe webhook event", {
+      type: event.type,
+      id: event.id,
+    });
+
+    const db = admin.firestore();
+
+    try {
+      switch (event.type) {
+        case "checkout.session.completed": {
+          const session = event.data.object as any;
+          const userId = session.metadata?.firebaseUserId;
+          const planName = session.metadata?.planName;
+
+          if (!userId || !planName) {
+            logger.error("Missing metadata in checkout session", {
+              sessionId: session.id,
+            });
+            break;
+          }
+
+          // Get subscription details
+          const subscriptionId = session.subscription;
+          if (!subscriptionId) {
+            logger.error("No subscription ID in checkout session", {
+              sessionId: session.id,
+            });
+            break;
+          }
+
+          const subscription = await stripe.subscriptions.retrieve(
+            subscriptionId
+          );
+          const planDetails = getPlanDetails(planName);
+
+          // Update user document
+          await db.collection("users").doc(userId).update({
+            subscriptionPlan: planDetails.name,
+            subscriptionStatus: subscription.status === "active" ? "active" : "incomplete",
+            stripeCustomerId: session.customer,
+            stripeSubscriptionId: subscriptionId,
+            currentPeriodStart: admin.firestore.Timestamp.fromMillis(
+              subscription.current_period_start * 1000
+            ),
+            currentPeriodEnd: admin.firestore.Timestamp.fromMillis(
+              subscription.current_period_end * 1000
+            ),
+            videoQuota: planDetails.quota,
+            videosUsedThisMonth: 0,
+          });
+
+          logger.info("Subscription activated", {
+            userId,
+            planName,
+            subscriptionId,
+          });
+          break;
+        }
+
+        case "customer.subscription.updated": {
+          const subscription = event.data.object as any;
+          const customerId = subscription.customer as string;
+
+          // Find user by customer ID
+          const usersSnapshot = await db
+            .collection("users")
+            .where("stripeCustomerId", "==", customerId)
+            .limit(1)
+            .get();
+
+          if (usersSnapshot.empty) {
+            logger.error("User not found for subscription update", {
+              customerId,
+              subscriptionId: subscription.id,
+            });
+            break;
+          }
+
+          const userDoc = usersSnapshot.docs[0];
+          const userData = userDoc.data();
+
+          // Determine plan from subscription items
+          const priceId = subscription.items?.data[0]?.price?.id;
+          let planName = userData.subscriptionPlan;
+
+          if (priceId) {
+            if (priceId === config.stripePriceIdStarter) {
+              planName = "starter";
+            } else if (priceId === config.stripePriceIdPro) {
+              planName = "pro";
+            } else if (priceId === config.stripePriceIdUltra) {
+              planName = "ultra";
+            }
+          }
+
+          const planDetails = getPlanDetails(planName);
+
+          // Update user document
+          await userDoc.ref.update({
+            subscriptionStatus: subscription.status,
+            currentPeriodStart: admin.firestore.Timestamp.fromMillis(
+              subscription.current_period_start * 1000
+            ),
+            currentPeriodEnd: admin.firestore.Timestamp.fromMillis(
+              subscription.current_period_end * 1000
+            ),
+            cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+            videoQuota: planDetails.quota,
+          });
+
+          logger.info("Subscription updated", {
+            userId: userDoc.id,
+            subscriptionId: subscription.id,
+            status: subscription.status,
+          });
+          break;
+        }
+
+        case "customer.subscription.deleted": {
+          const subscription = event.data.object as any;
+          const customerId = subscription.customer as string;
+
+          // Find user by customer ID
+          const usersSnapshot = await db
+            .collection("users")
+            .where("stripeCustomerId", "==", customerId)
+            .limit(1)
+            .get();
+
+          if (usersSnapshot.empty) {
+            logger.error("User not found for subscription deletion", {
+              customerId,
+              subscriptionId: subscription.id,
+            });
+            break;
+          }
+
+          const userDoc = usersSnapshot.docs[0];
+          const freePlanDetails = getPlanDetails("free");
+
+          // Reset to free plan
+          await userDoc.ref.update({
+            subscriptionPlan: "free",
+            subscriptionStatus: "canceled",
+            stripeSubscriptionId: admin.firestore.FieldValue.delete(),
+            currentPeriodStart: admin.firestore.FieldValue.delete(),
+            currentPeriodEnd: admin.firestore.FieldValue.delete(),
+            videoQuota: freePlanDetails.quota,
+          });
+
+          logger.info("Subscription canceled", {
+            userId: userDoc.id,
+            subscriptionId: subscription.id,
+          });
+          break;
+        }
+
+        default:
+          logger.info("Unhandled webhook event type", { type: event.type });
+      }
+
+      response.json({ received: true });
+    } catch (error) {
+      logger.error("Error processing webhook", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        eventType: event.type,
+      });
+      response.status(500).json({
+        error: "Webhook processing failed",
+      });
+    }
+  }
+);
+
+/**
+ * Cloud Function: resetMonthlyUsage
+ * Scheduled function to reset monthly video usage for all users
+ * Runs on the first day of each month
+ */
+export const resetMonthlyUsage = functions.pubsub
+  .schedule("0 0 1 * *")
+  .timeZone("America/Los_Angeles")
+  .onRun(async (context) => {
+    const { resetMonthlyUsage } = await import("./helpers/stripe");
+    const logger = createLogger("resetMonthlyUsage");
+
+    logger.info("Starting monthly usage reset");
+
+    try {
+      await resetMonthlyUsage();
+      logger.info("Monthly usage reset completed");
+      return null;
+    } catch (error) {
+      logger.error("Monthly usage reset failed", {
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+      throw error;
     }
   });

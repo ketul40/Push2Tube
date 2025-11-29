@@ -6,6 +6,7 @@ import YouTubeConnectionComponent from '@/components/YouTubeConnectionComponent'
 import PromptSubmissionComponent from '@/components/PromptSubmissionComponent';
 import JobMonitorComponent from '@/components/JobMonitorComponent';
 import MetricsDashboard from '@/components/MetricsDashboard';
+import SubscriptionStatus from '@/components/SubscriptionStatus';
 import { onAuthStateChanged } from '@/services/authService';
 import { getJobsByUserId } from '@/services/videoJobService';
 import { JobStatus } from '@/types';
@@ -203,7 +204,8 @@ const Dashboard: React.FC = () => {
 
             {/* Right Column - Analytics */}
             <div className="lg:col-span-5 xl:col-span-4">
-              <div className="sticky top-20">
+              <div className="sticky top-20 space-y-6">
+                <SubscriptionStatus />
                 <MetricsDashboard user={currentUser} />
               </div>
             </div>

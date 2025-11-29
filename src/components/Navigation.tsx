@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Home, History, LogOut } from 'lucide-react';
+import { Menu, X, Home, History, LogOut, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { signOutWithGuestMode, isGuestMode } from '@/services/authService';
@@ -32,6 +32,7 @@ const Navigation: React.FC = () => {
   const navLinks = [
     { to: '/dashboard', label: 'Dashboard', icon: Home },
     { to: '/history', label: 'History', icon: History },
+    { to: '/pricing', label: 'Pricing', icon: CreditCard },
   ];
 
   return (

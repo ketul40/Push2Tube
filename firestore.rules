@@ -15,14 +15,26 @@ service cloud.firestore {
     // Users collection rules
     // Requirement 9.5: Restrict users to their own data
     match /users/{userId} {
-      // Users can read their own document
+      // Users can read their own document (including subscription fields)
       allow read: if isOwner(userId);
       
       // Users can create their own document (during signup)
       allow create: if isOwner(userId);
       
-      // Users can update their own document
-      allow update: if isOwner(userId);
+      // Users can update their own document, but not subscription fields
+      // Subscription fields can only be updated by Cloud Functions (backend)
+      allow update: if isOwner(userId) &&
+                     // Prevent users from modifying subscription-related fields
+                     !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+                       'subscriptionPlan',
+                       'subscriptionStatus',
+                       'stripeCustomerId',
+                       'stripeSubscriptionId',
+                       'currentPeriodStart',
+                       'currentPeriodEnd',
+                       'videoQuota',
+                       'videosUsedThisMonth'
+                     ]);
       
       // No one can delete user documents
       allow delete: if false;
