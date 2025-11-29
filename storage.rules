@@ -1,0 +1,20 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Videos are stored at: videos/{userId}/{jobId}/{filename}
+    match /videos/{userId}/{jobId}/{filename} {
+      // Users can read their own videos
+      allow read: if request.auth != null && request.auth.uid == userId;
+      
+      // Only Cloud Functions can write (via Admin SDK)
+      // Users cannot directly upload to storage
+      allow write: if false;
+    }
+    
+    // Deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
