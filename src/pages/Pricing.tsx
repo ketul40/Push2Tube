@@ -233,9 +233,9 @@ const Pricing: React.FC = () => {
                       </div>
                     )}
 
-                    <CardHeader className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className={`text-2xl font-bold ${plan.color}`}>
+                    <CardHeader className="space-y-4 bg-transparent">
+                      <div className="flex items-center justify-between bg-transparent">
+                        <CardTitle className={`text-2xl font-bold ${plan.color} bg-transparent`}>
                           {plan.name}
                         </CardTitle>
                         {plan.savings && (
@@ -245,14 +245,14 @@ const Pricing: React.FC = () => {
                         )}
                       </div>
 
-                      <div className="space-y-1">
-                        <div className="flex items-baseline space-x-1">
-                          <span className={`text-4xl font-bold ${plan.color} ${plan.glowColor} leading-none bg-transparent border-0`}>
+                      <div className="space-y-1 bg-transparent">
+                        <div className="flex items-baseline space-x-1 bg-transparent">
+                          <span className={`text-4xl font-bold ${plan.color} ${plan.glowColor} leading-none bg-transparent border-0 outline-none`}>
                             {plan.price}
                           </span>
-                          <span className="text-gray-400 text-sm ml-1">{plan.period}</span>
+                          <span className="text-gray-400 text-sm ml-1 bg-transparent">{plan.period}</span>
                         </div>
-                        <CardDescription className="text-gray-300">
+                        <CardDescription className="text-gray-300 bg-transparent">
                           {plan.description}
                         </CardDescription>
                       </div>
