@@ -247,10 +247,10 @@ const Pricing: React.FC = () => {
 
                       <div className="space-y-1">
                         <div className="flex items-baseline space-x-1">
-                          <span className={`text-4xl font-bold ${plan.color} ${plan.glowColor}`}>
+                          <span className={`text-4xl font-bold ${plan.color} ${plan.glowColor} leading-none bg-transparent border-0`}>
                             {plan.price}
                           </span>
-                          <span className="text-gray-400 text-sm">{plan.period}</span>
+                          <span className="text-gray-400 text-sm ml-1">{plan.period}</span>
                         </div>
                         <CardDescription className="text-gray-300">
                           {plan.description}
