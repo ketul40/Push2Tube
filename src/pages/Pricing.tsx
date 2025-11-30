@@ -8,6 +8,7 @@ import { createCheckoutSession, getUserSubscription, getRemainingQuota } from '@
 import { getCurrentUser } from '@/services/authService';
 import { SubscriptionPlan, SubscriptionStatus } from '@/types/subscription';
 import { User } from '@/types';
+import Logo from '@/components/Logo';
 
 /**
  * Pricing Page
@@ -171,6 +172,11 @@ const Pricing: React.FC = () => {
 
       {/* Content */}
       <div className="relative z-10">
+        {/* Navigation with Logo */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 pt-4 sm:pt-6 lg:pt-8">
+          <Logo />
+        </div>
+        
         {/* Header */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-12 lg:py-16 xl:py-20">
           <div className="max-w-4xl mx-auto text-center space-y-6 animate-fade-in">

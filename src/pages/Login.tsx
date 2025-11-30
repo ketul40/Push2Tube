@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Play, Sparkles, Video, Zap, ArrowLeft, Shield, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import Logo from '@/components/Logo';
 
 /**
  * Login Page
@@ -95,15 +96,18 @@ const Login: React.FC = () => {
         ))}
       </div>
 
-      {/* Navigation Back Button */}
+      {/* Navigation with Logo */}
       <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 pt-4 sm:pt-6 lg:pt-8 pb-3 sm:pb-4">
-        <Link
-          to="/"
-          className="inline-flex items-center space-x-2 text-gray-400 hover:text-neon-cyan transition-colors group text-sm sm:text-base lg:text-lg"
-        >
-          <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 group-hover:-translate-x-1 transition-transform" />
-          <span>Back to Home</span>
-        </Link>
+        <div className="flex items-center justify-between">
+          <Logo />
+          <Link
+            to="/"
+            className="inline-flex items-center space-x-2 text-gray-400 hover:text-neon-cyan transition-colors group text-sm sm:text-base lg:text-lg"
+          >
+            <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 group-hover:-translate-x-1 transition-transform" />
+            <span>Back to Home</span>
+          </Link>
+        </div>
       </div>
 
       {/* Main Content */}

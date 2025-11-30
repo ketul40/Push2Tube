@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { signOutWithGuestMode, isGuestMode } from '@/services/authService';
 import { cn } from '@/lib/utils';
+import Logo from '@/components/Logo';
 
 /**
  * Navigation Component
@@ -40,19 +41,7 @@ const Navigation: React.FC = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo/Brand */}
-          <Link 
-            to="/" 
-            className="flex items-center space-x-2 text-xl font-bold tracking-tight transition-all hover:scale-105"
-          >
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <div className="absolute inset-0 bg-neon-green blur-lg opacity-50"></div>
-                <span className="relative text-neon-green text-glow-green">PUSH</span>
-              </div>
-              <span className="text-neon-cyan text-glow-cyan">2</span>
-              <span className="text-white">TUBE</span>
-            </div>
-          </Link>
+          <Logo />
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-4">

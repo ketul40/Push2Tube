@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sparkles, Video, Zap, Upload, Shield, ArrowRight, Play, CreditCard } from 'lucide-react';
 import { onAuthStateChanged, isGuestMode } from '@/services/authService';
+import Logo from '@/components/Logo';
 
 // Move features outside component to prevent recreation on every render
 const FEATURES = [
@@ -115,16 +116,7 @@ const Home: React.FC = () => {
         {/* Navigation */}
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-4 sm:py-6 lg:py-8">
           <div className="flex items-center justify-between max-w-[1200px] lg:max-w-[1400px] xl:max-w-[1600px] 1440p:max-w-[1800px] mx-auto">
-            <div className="flex items-center space-x-2">
-              <div className="relative">
-                <div className="absolute inset-0 bg-neon-green blur-2xl opacity-50"></div>
-                <h1 className="relative text-xl sm:text-2xl lg:text-3xl font-bold whitespace-nowrap">
-                  <span className="text-neon-green text-glow-green">PUSH</span>
-                  <span className="text-neon-cyan text-glow-cyan">2</span>
-                  <span className="text-white">TUBE</span>
-                </h1>
-              </div>
-            </div>
+            <Logo />
             <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-wrap justify-end">
               <Button
                 onClick={handleViewPricing}
