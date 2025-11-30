@@ -1,17 +1,60 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, Video, Zap, Upload, Shield, ArrowRight, Play } from 'lucide-react';
+import { Sparkles, Video, Zap, Upload, Shield, ArrowRight, Play, CreditCard } from 'lucide-react';
 import { onAuthStateChanged, isGuestMode } from '@/services/authService';
+
+// Move features outside component to prevent recreation on every render
+const FEATURES = [
+  {
+    icon: Sparkles,
+    title: 'AI-Powered Generation',
+    description: 'Create engaging videos from simple text prompts using advanced AI technology',
+    color: 'text-neon-green'
+  },
+  {
+    icon: Video,
+    title: 'Viral Short Clips',
+    description: 'Create engaging short-form videos optimized for YouTube Shorts that capture attention',
+    color: 'text-neon-cyan'
+  },
+  {
+    icon: Zap,
+    title: 'Lightning Fast',
+    description: 'Experience rapid video generation with our optimized processing pipeline',
+    color: 'text-yellow-400'
+  },
+  {
+    icon: Upload,
+    title: 'Auto Upload',
+    description: 'Seamlessly upload your videos directly to YouTube with one click',
+    color: 'text-neon-purple'
+  },
+] as const;
+
+// Generate stable particle positions
+const generateParticles = (count: number) => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    delay: Math.random() * 3,
+    duration: 2 + Math.random() * 3,
+  }));
+};
 
 /**
  * Home Page
  * Beautiful landing page with feature highlights and authentication options
  * Allows users to sign in or try as guest
+ * Optimized for performance with memoized values and stable references
  */
 const Home: React.FC = () => {
   const navigate = useNavigate();
+
+  // Memoize particle positions to prevent regeneration on every render
+  const particles = useMemo(() => generateParticles(25), []);
 
   useEffect(() => {
     // Redirect to dashboard if already in guest mode or authenticated
@@ -29,42 +72,19 @@ const Home: React.FC = () => {
     return () => unsubscribe();
   }, [navigate]);
 
-  const handleTryAsGuest = () => {
-    // Store guest mode flag in localStorage
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleTryAsGuest = useCallback(() => {
     localStorage.setItem('guestMode', 'true');
     navigate('/dashboard');
-  };
+  }, [navigate]);
 
-  const handleSignIn = () => {
+  const handleSignIn = useCallback(() => {
     navigate('/login');
-  };
+  }, [navigate]);
 
-  const features = [
-    {
-      icon: Sparkles,
-      title: 'AI-Powered Generation',
-      description: 'Create engaging videos from simple text prompts using advanced AI technology',
-      color: 'text-neon-green'
-    },
-    {
-      icon: Video,
-      title: 'Viral Short Clips',
-      description: 'Create engaging short-form videos optimized for YouTube Shorts that capture attention',
-      color: 'text-neon-cyan'
-    },
-    {
-      icon: Zap,
-      title: 'Lightning Fast',
-      description: 'Experience rapid video generation with our optimized processing pipeline',
-      color: 'text-yellow-400'
-    },
-    {
-      icon: Upload,
-      title: 'Auto Upload',
-      description: 'Seamlessly upload your videos directly to YouTube with one click',
-      color: 'text-neon-purple'
-    },
-  ];
+  const handleViewPricing = useCallback(() => {
+    navigate('/pricing');
+  }, [navigate]);
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#0a0a0a]">
@@ -74,17 +94,17 @@ const Home: React.FC = () => {
       <div className="absolute bottom-1/4 -right-20 w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 xl:w-[500px] xl:h-[500px] 1440p:w-[600px] 1440p:h-[600px] bg-neon-cyan/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] sm:w-[700px] sm:h-[700px] lg:w-[800px] lg:h-[800px] xl:w-[1000px] xl:h-[1000px] 1440p:w-[1200px] 1440p:h-[1200px] bg-neon-purple/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       
-      {/* Floating Particles */}
+      {/* Floating Particles - Memoized for performance */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(30)].map((_, i) => (
+        {particles.map((particle) => (
           <div
-            key={i}
+            key={particle.id}
             className="absolute w-1 h-1 bg-neon-green/50 rounded-full animate-pulse"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
+              animationDelay: `${particle.delay}s`,
+              animationDuration: `${particle.duration}s`,
             }}
           />
         ))}
@@ -105,17 +125,26 @@ const Home: React.FC = () => {
                 </h1>
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-4">
+            <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-wrap justify-end">
+              <Button
+                onClick={handleViewPricing}
+                variant="ghost"
+                className="text-gray-300 hover:text-neon-purple hover:bg-neon-purple/10 text-sm lg:text-base px-2 sm:px-3 lg:px-4"
+              >
+                <CreditCard className="w-4 h-4 sm:mr-1.5" />
+                <span className="hidden sm:inline">Pricing</span>
+              </Button>
               <Button
                 onClick={handleTryAsGuest}
                 variant="outline"
-                className="border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10 hidden sm:flex text-sm lg:text-base px-3 lg:px-4"
+                className="border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10 text-sm lg:text-base px-2 sm:px-3 lg:px-4"
               >
-                Try as Guest
+                <span className="hidden sm:inline">Try as Guest</span>
+                <span className="sm:hidden">Guest</span>
               </Button>
               <Button
                 onClick={handleSignIn}
-                className="bg-neon-green hover:bg-neon-green/80 text-black font-semibold text-sm sm:text-base px-4 lg:px-6"
+                className="bg-neon-green hover:bg-neon-green/80 text-black font-semibold text-sm sm:text-base px-3 sm:px-4 lg:px-6"
               >
                 Sign In
               </Button>
@@ -165,6 +194,18 @@ const Home: React.FC = () => {
                 Sign In with Google
               </Button>
             </div>
+            
+            {/* Secondary CTA */}
+            <div className="pt-2 sm:pt-4">
+              <Button
+                onClick={handleViewPricing}
+                variant="ghost"
+                className="text-gray-400 hover:text-neon-purple text-sm sm:text-base transition-colors"
+              >
+                View Pricing Plans
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
+            </div>
 
             {/* Trust Indicators */}
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 lg:gap-6 xl:gap-8 pt-6 sm:pt-8 lg:pt-10 text-xs sm:text-sm lg:text-base text-gray-400 px-4">
@@ -198,11 +239,11 @@ const Home: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 xl:gap-10 px-4">
-              {features.map((feature, index) => {
+              {FEATURES.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
                   <Card
-                    key={index}
+                    key={feature.title}
                     className="glass border-white/10 hover:border-neon-green/30 transition-all duration-300 hover:scale-105 group"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
@@ -255,6 +296,15 @@ const Home: React.FC = () => {
                     className="w-full sm:w-auto border-2 border-neon-cyan/50 text-neon-cyan hover:bg-neon-cyan/10 font-semibold text-base sm:text-lg lg:text-xl px-6 sm:px-8 lg:px-10 xl:px-12 py-4 sm:py-5 lg:py-6 xl:py-7 h-auto"
                   >
                     Sign In with Google
+                  </Button>
+                  <Button
+                    onClick={handleViewPricing}
+                    size="lg"
+                    variant="ghost"
+                    className="w-full sm:w-auto text-gray-300 hover:text-neon-purple font-medium text-base sm:text-lg lg:text-xl px-6 sm:px-8 lg:px-10 xl:px-12 py-4 sm:py-5 lg:py-6 xl:py-7 h-auto"
+                  >
+                    <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 mr-2" />
+                    View Pricing
                   </Button>
                 </div>
               </CardContent>
