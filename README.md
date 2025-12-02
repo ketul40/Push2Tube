@@ -46,10 +46,16 @@ cp .env.example .env
 
 4. (Optional) Enable test mode to bypass authentication:
 ```bash
-# Add to .env.local:
+# Create .env.local file in the root directory:
 VITE_TEST_MODE=true
+
+# Optional: Test different subscription plans
+VITE_TEST_SUBSCRIPTION_PLAN=pro  # Options: free, starter, pro, ultra
+
+# Optional: Simulate YouTube connection
+VITE_TEST_YOUTUBE_CONNECTED=true
 ```
-**Note:** Test mode bypasses authentication for testing purposes. Set to `false` or remove to require authentication.
+**Note:** Test mode bypasses authentication and uses mock data. See `TEST_MODE_GUIDE.md` for detailed instructions on testing authenticated features locally.
 
 5. Run development server:
 ```bash

@@ -3,6 +3,7 @@ import { User as FirebaseUser } from 'firebase/auth';
 import { getUserById } from '@/services/userService';
 import { connectYouTube } from '@/services/youtubeService';
 import { isGuestMode } from '@/services/authService';
+import { TEST_MODE } from '@/config/testMode';
 import { User } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -76,6 +77,16 @@ const YouTubeConnectionComponent: React.FC<YouTubeConnectionComponentProps> = ({
   const handleConnect = async () => {
     try {
       setConnecting(true);
+      
+      // In test mode, simulate YouTube connection
+      if (TEST_MODE) {
+        toast.success('YouTube connection simulated (Test Mode)');
+        // Reload user data to show connected state
+        await loadUserData();
+        setConnecting(false);
+        return;
+      }
+      
       await connectYouTube();
       // User will be redirected to OAuth flow
     } catch (err) {

@@ -15,6 +15,7 @@ import {
 import { VideoJob, JobStatus } from '../types';
 import { trackAPICall } from '../utils/performanceMonitoring';
 import { getUserById } from './userService';
+import { TEST_MODE } from '../config/testMode';
 
 /**
  * Create a new video job in Firestore
@@ -45,6 +46,14 @@ export async function createVideoJob(
       throw new Error(
         `Video quota exceeded. You have used ${user.videosUsedThisMonth}/${user.videoQuota} videos this month. Please upgrade your plan or wait for next month.`
       );
+    }
+
+    // In test mode, return a mock job ID without writing to Firestore
+    if (TEST_MODE) {
+      const mockJobId = `test-job-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      tracker.addAttribute('status', 'success');
+      tracker.addAttribute('testMode', 'true');
+      return mockJobId;
     }
 
     const jobsCollection = collection(db, 'videoJobs');
@@ -84,6 +93,14 @@ export async function getJobsByUserId(userId: string): Promise<VideoJob[]> {
   tracker.start();
   
   try {
+    // In test mode, return empty array (no real jobs stored)
+    if (TEST_MODE) {
+      tracker.addAttribute('status', 'success');
+      tracker.addAttribute('testMode', 'true');
+      tracker.addMetric('jobCount', 0);
+      return [];
+    }
+
     const jobsCollection = collection(db, 'videoJobs');
     const q = query(
       jobsCollection,
@@ -168,6 +185,17 @@ export function subscribeToJob(
   jobId: string,
   callback: (job: VideoJob | null) => void
 ): Unsubscribe {
+  // In test mode, return a mock unsubscribe function
+  // Jobs won't actually be processed in test mode
+  if (TEST_MODE) {
+    // Call callback with null to indicate job doesn't exist
+    // This allows the UI to show appropriate messaging
+    setTimeout(() => callback(null), 0);
+    
+    // Return a no-op unsubscribe function
+    return () => {};
+  }
+
   const jobRef = doc(db, 'videoJobs', jobId);
 
   return onSnapshot(jobRef, (docSnap) => {

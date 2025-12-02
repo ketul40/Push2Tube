@@ -2,6 +2,7 @@ import { db } from '../config/firebase';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { User } from '../types';
 import { SubscriptionPlan, SubscriptionStatus } from '../types/subscription';
+import { TEST_MODE, MOCK_USER_DATA } from '../config/testMode';
 
 /**
  * Create or update a user document in Firestore
@@ -88,6 +89,11 @@ export async function createOrUpdateUser(
  * Requirements: 1.3, 2.2, 10.4
  */
 export async function getUserById(uid: string): Promise<User | null> {
+  // In test mode, return mock user data
+  if (TEST_MODE && uid === 'test-user-123') {
+    return { ...MOCK_USER_DATA };
+  }
+
   const userRef = doc(db, 'users', uid);
   const userSnap = await getDoc(userRef);
 

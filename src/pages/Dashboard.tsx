@@ -9,6 +9,7 @@ import MetricsDashboard from '@/components/MetricsDashboard';
 import SubscriptionStatus from '@/components/SubscriptionStatus';
 import { onAuthStateChanged } from '@/services/authService';
 import { getJobsByUserId } from '@/services/videoJobService';
+import { createOrUpdateUser } from '@/services/userService';
 import { JobStatus } from '@/types';
 import { trackPageLoad } from '@/utils/performanceMonitoring';
 import { Card, CardContent } from '@/components/ui/card';
@@ -55,7 +56,21 @@ const Dashboard: React.FC = () => {
       return;
     }
     
-    const unsubscribe = onAuthStateChanged((currentUser) => {
+    const unsubscribe = onAuthStateChanged(async (currentUser) => {
+      if (currentUser) {
+        // Create or update user document in Firestore
+        try {
+          await createOrUpdateUser(
+            currentUser.uid,
+            currentUser.email || '',
+            currentUser.displayName || 'User'
+          );
+          console.log('✅ User document created/updated in Firestore');
+        } catch (error) {
+          console.error('Error creating/updating user document:', error);
+          // Don't block the UI if this fails
+        }
+      }
       setUser(currentUser);
       setLoading(false);
     });
