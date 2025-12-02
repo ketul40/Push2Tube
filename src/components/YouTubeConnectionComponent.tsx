@@ -36,9 +36,13 @@ const YouTubeConnectionComponent: React.FC<YouTubeConnectionComponentProps> = ({
     const params = new URLSearchParams(window.location.search);
     const success = params.get('success');
     const errorMsg = params.get('error');
+    const channel = params.get('channel');
 
     if (success === 'true') {
-      toast.success('YouTube account connected successfully!');
+      const message = channel 
+        ? `YouTube account connected successfully! Channel: ${channel}`
+        : 'YouTube account connected successfully!';
+      toast.success(message);
       // Reload user data to reflect connection
       loadUserData();
       // Clean up URL

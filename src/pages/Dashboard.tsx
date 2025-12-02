@@ -56,8 +56,6 @@ const Dashboard: React.FC = () => {
       return;
     }
     
-    let isInitialLoad = true;
-    
     const unsubscribe = onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
         // Create or update user document in Firestore
@@ -90,7 +88,6 @@ const Dashboard: React.FC = () => {
       
       setUser(currentUser);
       setLoading(false);
-      isInitialLoad = false;
     });
 
     return () => unsubscribe();

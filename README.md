@@ -31,8 +31,14 @@ npm install
 
 2. Configure environment variables:
 ```bash
+# Frontend environment variables
 cp .env.example .env.local
 # Edit .env.local with your Firebase credentials
+
+# Backend environment variables (Cloud Functions)
+cd functions
+cp .env.example .env
+# Edit .env with your API keys (see functions/.env.example)
 ```
 
 3. Set up Stripe (for payments):

@@ -102,13 +102,24 @@ export const youtubeOAuthCallback = functions.https.onRequest(
       );
 
       // Redirect to success page
+      // Use origin from request, or construct from Firebase project
+      const origin = request.headers.origin || 
+        (process.env.FIREBASE_PROJECT_ID 
+          ? `https://${process.env.FIREBASE_PROJECT_ID}.web.app`
+          : "https://push2tube-dev.web.app");
+      
       response.redirect(
-        `${request.headers.origin || "http://localhost:5173"}/youtube-connected?success=true&channel=${encodeURIComponent(channelInfo.channelTitle)}`
+        `${origin}/dashboard?success=true&channel=${encodeURIComponent(channelInfo.channelTitle)}`
       );
     } catch (error) {
       console.error("Error in YouTube OAuth callback:", error);
+      const origin = request.headers.origin || 
+        (process.env.FIREBASE_PROJECT_ID 
+          ? `https://${process.env.FIREBASE_PROJECT_ID}.web.app`
+          : "https://push2tube-dev.web.app");
+      
       response.redirect(
-        `${request.headers.origin || "http://localhost:5173"}/youtube-connected?success=false&error=${encodeURIComponent("Failed to connect YouTube account")}`
+        `${origin}/dashboard?success=false&error=${encodeURIComponent("Failed to connect YouTube account")}`
       );
     }
   }

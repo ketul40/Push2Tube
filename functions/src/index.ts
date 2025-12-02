@@ -497,8 +497,11 @@ export const createCheckoutSession = functions.https.onRequest(
         // Create checkout session
         const stripe = initializeStripe();
 
-        // Get the frontend URL from request or use default
-        const origin = request.headers.origin || "http://localhost:5173";
+        // Get the frontend URL from request or use production default
+        const origin = request.headers.origin || 
+          (process.env.FIREBASE_PROJECT_ID 
+            ? `https://${process.env.FIREBASE_PROJECT_ID}.web.app`
+            : "https://push2tube-dev.web.app");
         const successUrl = `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`;
         const cancelUrl = `${origin}/pricing?canceled=true`;
 
@@ -599,7 +602,10 @@ export const createPortalSession = functions.https.onRequest(
 
         // Create portal session
         const stripe = initializeStripe();
-        const origin = request.headers.origin || "http://localhost:5173";
+        const origin = request.headers.origin || 
+          (process.env.FIREBASE_PROJECT_ID 
+            ? `https://${process.env.FIREBASE_PROJECT_ID}.web.app`
+            : "https://push2tube-dev.web.app");
         const returnUrl = `${origin}/dashboard`;
 
         const session = await stripe.billingPortal.sessions.create({

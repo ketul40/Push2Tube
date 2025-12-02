@@ -6,7 +6,8 @@
 
 import { getCurrentUser } from './authService';
 
-const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL || 'http://localhost:5001/push2tube-dev/us-central1';
+const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL || 
+  `https://${import.meta.env.VITE_FIREBASE_PROJECT_ID || 'push2tube-dev'}-${import.meta.env.VITE_FIREBASE_REGION || 'us-central1'}.cloudfunctions.net`;
 
 /**
  * Get YouTube OAuth authorization URL
