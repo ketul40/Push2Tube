@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { getUserById } from '@/services/userService';
 import { connectYouTube } from '@/services/youtubeService';
+import { isGuestMode } from '@/services/authService';
 import { User } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,11 +52,22 @@ const YouTubeConnectionComponent: React.FC<YouTubeConnectionComponentProps> = ({
   const loadUserData = async () => {
     try {
       setLoading(true);
+      
+      // Skip Firestore call for guest users
+      if (isGuestMode() || user.uid === 'guest-user') {
+        setUserData(null);
+        setLoading(false);
+        return;
+      }
+      
       const data = await getUserById(user.uid);
       setUserData(data);
     } catch (err) {
       console.error('Error loading user data:', err);
-      toast.error('Failed to load YouTube connection status');
+      // Only show toast for non-guest users
+      if (!isGuestMode() && user.uid !== 'guest-user') {
+        toast.error('Failed to load YouTube connection status');
+      }
     } finally {
       setLoading(false);
     }
@@ -83,6 +95,35 @@ const YouTubeConnectionComponent: React.FC<YouTubeConnectionComponentProps> = ({
     );
   }
 
+  // Handle guest mode - show message that YouTube connection requires authentication
+  if (isGuestMode() || user.uid === 'guest-user') {
+    return (
+      <Card className="glass border-white/10">
+        <CardHeader>
+          <div className="flex items-center space-x-3">
+            <div className="p-2 rounded-lg bg-white/5">
+              <Youtube className="w-6 h-6 text-gray-400" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">YouTube Connection</CardTitle>
+              <CardDescription>
+                Sign in to connect your YouTube account
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+            <p className="text-sm text-gray-300">
+              YouTube account connection is available for authenticated users only. Please sign in to enable automatic video uploads.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Handle error case for authenticated users
   if (!userData) {
     return (
       <Card className="glass border-red-500/20">

@@ -171,3 +171,4 @@ The UI is fully responsive across all breakpoints:
 - Firebase integration unchanged
 - All existing functionality preserved
 
+
