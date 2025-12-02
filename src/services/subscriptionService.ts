@@ -9,7 +9,7 @@ import { User } from '../types';
 import { QuotaStatus, SubscriptionPlan } from '../types/subscription';
 
 const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL || 
-  `https://${import.meta.env.VITE_FIREBASE_PROJECT_ID || 'push2tube-dev'}-${import.meta.env.VITE_FIREBASE_REGION || 'us-central1'}.cloudfunctions.net`;
+  `https://${import.meta.env.VITE_FIREBASE_REGION || 'us-central1'}-${import.meta.env.VITE_FIREBASE_PROJECT_ID || 'push2tube-dev'}.cloudfunctions.net`;
 
 /**
  * Create a Stripe Checkout session for subscription

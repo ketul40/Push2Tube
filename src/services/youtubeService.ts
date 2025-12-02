@@ -7,7 +7,7 @@
 import { getCurrentUser } from './authService';
 
 const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL || 
-  `https://${import.meta.env.VITE_FIREBASE_PROJECT_ID || 'push2tube-dev'}-${import.meta.env.VITE_FIREBASE_REGION || 'us-central1'}.cloudfunctions.net`;
+  `https://${import.meta.env.VITE_FIREBASE_REGION || 'us-central1'}-${import.meta.env.VITE_FIREBASE_PROJECT_ID || 'push2tube-dev'}.cloudfunctions.net`;
 
 /**
  * Get YouTube OAuth authorization URL
@@ -51,6 +51,33 @@ export async function connectYouTube(): Promise<void> {
   } catch (error) {
     console.error('Error connecting YouTube:', error);
     throw error;
+  }
+}
+
+/**
+ * Disconnect YouTube account
+ * Removes YouTube connection and clears all tokens
+ * Requirements: 2.3
+ */
+export async function disconnectYouTube(): Promise<void> {
+  const user = getCurrentUser();
+  if (!user) {
+    throw new Error('User must be authenticated');
+  }
+
+  const idToken = await user.getIdToken();
+
+  const response = await fetch(`${FUNCTIONS_BASE_URL}/disconnectYouTube`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${idToken}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to disconnect YouTube account');
   }
 }
 

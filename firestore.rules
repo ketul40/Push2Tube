@@ -67,6 +67,24 @@ service cloud.firestore {
       allow delete: if false;
     }
     
+    // Metrics collection rules
+    // Allow users to read and create their own metrics
+    // Requirement 9.5: Restrict users to their own data
+    match /metrics/{metricId} {
+      // Users can read metrics where userId matches their own uid
+      // This allows queries filtering by userId == request.auth.uid
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      
+      // Users can create metrics for tracking
+      // Ensure userId matches the authenticated user (required for security)
+      allow create: if isAuthenticated() && 
+                       request.resource.data.userId == request.auth.uid;
+      
+      // Users cannot update or delete metrics
+      allow update, delete: if false;
+    }
+    
     // Default deny all other collections
     match /{document=**} {
       allow read, write: if false;

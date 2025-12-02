@@ -501,7 +501,7 @@ export const createCheckoutSession = functions.https.onRequest(
         const origin = request.headers.origin || 
           (process.env.FIREBASE_PROJECT_ID 
             ? `https://${process.env.FIREBASE_PROJECT_ID}.web.app`
-            : "https://push2tube-dev.web.app");
+            : "https://push2tube.web.app");
         const successUrl = `${origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`;
         const cancelUrl = `${origin}/pricing?canceled=true`;
 
@@ -605,7 +605,7 @@ export const createPortalSession = functions.https.onRequest(
         const origin = request.headers.origin || 
           (process.env.FIREBASE_PROJECT_ID 
             ? `https://${process.env.FIREBASE_PROJECT_ID}.web.app`
-            : "https://push2tube-dev.web.app");
+            : "https://push2tube.web.app");
         const returnUrl = `${origin}/dashboard`;
 
         const session = await stripe.billingPortal.sessions.create({

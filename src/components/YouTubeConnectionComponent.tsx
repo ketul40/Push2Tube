@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { getUserById } from '@/services/userService';
-import { connectYouTube } from '@/services/youtubeService';
+import { connectYouTube, disconnectYouTube } from '@/services/youtubeService';
 import { isGuestMode } from '@/services/authService';
 import { TEST_MODE } from '@/config/testMode';
 import { User } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Youtube, CheckCircle2, Circle, Loader2, AlertCircle } from 'lucide-react';
+import { Youtube, CheckCircle2, Circle, Loader2, AlertCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 /**
@@ -26,6 +26,7 @@ const YouTubeConnectionComponent: React.FC<YouTubeConnectionComponentProps> = ({
   const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
 
   useEffect(() => {
     loadUserData();
@@ -97,6 +98,34 @@ const YouTubeConnectionComponent: React.FC<YouTubeConnectionComponentProps> = ({
       console.error('Error connecting YouTube:', err);
       toast.error('Failed to initiate YouTube connection. Please try again.');
       setConnecting(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    if (!confirm('Are you sure you want to disconnect your YouTube account? You will need to reconnect to upload videos.')) {
+      return;
+    }
+
+    try {
+      setDisconnecting(true);
+      
+      // In test mode, simulate disconnection
+      if (TEST_MODE) {
+        toast.success('YouTube disconnection simulated (Test Mode)');
+        await loadUserData();
+        setDisconnecting(false);
+        return;
+      }
+      
+      await disconnectYouTube();
+      toast.success('YouTube account disconnected successfully');
+      // Reload user data to reflect disconnection
+      await loadUserData();
+    } catch (err) {
+      console.error('Error disconnecting YouTube:', err);
+      toast.error('Failed to disconnect YouTube account. Please try again.');
+    } finally {
+      setDisconnecting(false);
     }
   };
 
@@ -200,6 +229,26 @@ const YouTubeConnectionComponent: React.FC<YouTubeConnectionComponentProps> = ({
                 </div>
               </div>
             </div>
+            
+            <Button
+              onClick={handleDisconnect}
+              disabled={disconnecting}
+              variant="outline"
+              className="w-full border-red-500/50 text-red-400 hover:bg-red-500/10 hover:border-red-500 transition-all duration-300"
+              size="lg"
+            >
+              {disconnecting ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Disconnecting...
+                </>
+              ) : (
+                <>
+                  <X className="w-5 h-5 mr-2" />
+                  Disconnect YouTube Account
+                </>
+              )}
+            </Button>
           </div>
         ) : (
           <div className="space-y-4">

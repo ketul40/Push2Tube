@@ -163,8 +163,10 @@ export async function calculateAverageProcessingTime(userId: string, days: numbe
 
 /**
  * Get API usage statistics
+ * @param days - Number of days to look back (default: 7)
+ * @param userId - Optional user ID to filter by. If not provided, returns stats for all users (admin only)
  */
-export async function getAPIUsageStats(days: number = 7): Promise<{
+export async function getAPIUsageStats(days: number = 7, userId?: string): Promise<{
   totalCalls: number;
   successfulCalls: number;
   failedCalls: number;
@@ -175,11 +177,18 @@ export async function getAPIUsageStats(days: number = 7): Promise<{
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
     
-    const apiQuery = query(
-      metricsCollection,
+    // Build query with optional userId filter for security
+    const queryConstraints = [
       where('type', '==', MetricType.API_CALL),
       where('timestamp', '>=', Timestamp.fromDate(cutoffDate))
-    );
+    ];
+    
+    // Add userId filter if provided (for user-specific stats)
+    if (userId) {
+      queryConstraints.push(where('userId', '==', userId));
+    }
+    
+    const apiQuery = query(metricsCollection, ...queryConstraints);
     
     const snapshot = await getDocs(apiQuery);
     

@@ -205,6 +205,24 @@ export async function updateUserYouTubeConnection(
 }
 
 /**
+ * Disconnect YouTube account from user
+ * Clears all YouTube-related data including tokens
+ * Requirements: 2.3
+ */
+export async function disconnectUserYouTube(userId: string): Promise<void> {
+  const db = admin.firestore();
+  const userRef = db.collection("users").doc(userId);
+
+  await userRef.update({
+    youtubeConnected: false,
+    youtubeChannelId: admin.firestore.FieldValue.delete(),
+    oauthRefreshToken: admin.firestore.FieldValue.delete(),
+    oauthAccessToken: admin.firestore.FieldValue.delete(),
+    oauthExpiresAt: admin.firestore.FieldValue.delete(),
+  });
+}
+
+/**
  * Check if access token is expired
  * Requirements: 2.4
  */
