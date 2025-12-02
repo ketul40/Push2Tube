@@ -118,3 +118,4 @@ When ready for real payments:
 5. Redeploy functions and frontend
 6. Update webhook endpoint to use live signing secret
 
+

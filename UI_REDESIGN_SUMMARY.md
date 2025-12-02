@@ -172,3 +172,4 @@ The UI is fully responsive across all breakpoints:
 - All existing functionality preserved
 
 
+
