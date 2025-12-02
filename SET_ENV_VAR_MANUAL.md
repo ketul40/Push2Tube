@@ -26,7 +26,11 @@ You need to update all 11 functions. For each one:
 6. Click **"ADD VARIABLE"**
 7. Enter:
    - **Name**: `TOKEN_ENCRYPTION_KEY`
-   - **Value**: `4ecb38472d72c06982b56f08fad67efff2a26e15b2cf35bce0c399a36c99967c`
+   - **Value**: Generate a secure 64-character hex key using:
+     ```bash
+     node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+     ```
+     **IMPORTANT**: Never use keys from documentation or commit them to version control!
 8. Click **"DEPLOY"** (bottom of the page)
 9. Wait for deployment to complete (usually 1-2 minutes)
 

@@ -44,40 +44,7 @@ gcloud functions deploy FUNCTION_NAME \
   --region=us-central1
 ```
 
-But this requires deploying each function individually. 
-
-### Method 4: Automated Script (Easiest - Sets All Functions at Once)
-
-I've created scripts to automatically set the environment variable for all functions:
-
-**Using Git Bash (Recommended):**
-```bash
-# From project root
-chmod +x scripts/set-env-vars.sh
-./scripts/set-env-vars.sh
-```
-
-**Or use the simple version:**
-```bash
-chmod +x scripts/set-env-vars-simple.sh
-./scripts/set-env-vars-simple.sh
-```
-
-**Using PowerShell:**
-```powershell
-# You may need to allow script execution first:
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-
-# Then run:
-.\scripts\set-env-vars.ps1
-```
-
-**Prerequisites:**
-- Google Cloud SDK (gcloud CLI) must be installed
-- You must be authenticated: `gcloud auth login`
-- Make sure the PROJECT_ID in the script matches your Firebase project ID
-
-The scripts will update all 11 functions automatically!
+But this requires deploying each function individually. **The easiest solution is Method 1 (Google Cloud Console)**.
 
 ## Step 2: Deploy Functions
 
@@ -122,4 +89,3 @@ Since your code uses `process.env`, you can also use a `.env` file that gets loa
 - Environment variables set in Firebase Console are available to all functions
 - Secrets are more secure but require code changes to access them
 - For now, using environment variables (Method 1) is the simplest approach
-

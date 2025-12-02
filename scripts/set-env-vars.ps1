@@ -6,7 +6,22 @@
 $PROJECT_ID = "push2tube"  # Change this to your actual project ID if different
 $REGION = "us-central1"
 $ENV_VAR_NAME = "TOKEN_ENCRYPTION_KEY"
-$ENV_VAR_VALUE = "4ecb38472d72c06982b56f08fad67efff2a26e15b2cf35bce0c399a36c99967c"
+
+# SECURITY: Never hardcode encryption keys in scripts!
+# Read from environment variable
+if (-not $env:TOKEN_ENCRYPTION_KEY) {
+    Write-Host "ERROR: TOKEN_ENCRYPTION_KEY environment variable is not set" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Please set it before running this script:"
+    Write-Host "  `$env:TOKEN_ENCRYPTION_KEY = 'your-key-here'"
+    Write-Host "  .\scripts\set-env-vars.ps1"
+    Write-Host ""
+    Write-Host "Or generate a new key:"
+    Write-Host "  node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+    exit 1
+}
+
+$ENV_VAR_VALUE = $env:TOKEN_ENCRYPTION_KEY
 
 # List of all functions
 $FUNCTIONS = @(
@@ -109,7 +124,7 @@ if ($FAILED -gt 0) {
     Write-Host "1. Go to https://console.cloud.google.com/functions"
     Write-Host "2. Click on each failed function"
     Write-Host "3. Click 'Edit' → 'Runtime environment variables' → 'Add variable'"
-    Write-Host "4. Add: $ENV_VAR_NAME = $ENV_VAR_VALUE"
+    Write-Host "4. Add: $ENV_VAR_NAME = [your encryption key]"
     exit 1
 } else {
     Write-Host ""

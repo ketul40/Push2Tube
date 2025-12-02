@@ -7,7 +7,19 @@
 PROJECT_ID="push2tube"
 REGION="us-central1"
 ENV_VAR_NAME="TOKEN_ENCRYPTION_KEY"
-ENV_VAR_VALUE="4ecb38472d72c06982b56f08fad67efff2a26e15b2cf35bce0c399a36c99967c"
+
+# SECURITY: Never hardcode encryption keys in scripts!
+# Read from environment variable
+if [ -z "$TOKEN_ENCRYPTION_KEY" ]; then
+  echo "ERROR: TOKEN_ENCRYPTION_KEY environment variable is not set"
+  echo ""
+  echo "Set it before running:"
+  echo "  export TOKEN_ENCRYPTION_KEY='your-key-here'"
+  echo "  ./scripts/set-env-vars-simple.sh"
+  exit 1
+fi
+
+ENV_VAR_VALUE="$TOKEN_ENCRYPTION_KEY"
 
 FUNCTIONS=(
   "createVideoJob"

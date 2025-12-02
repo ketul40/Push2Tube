@@ -70,7 +70,9 @@ If these fields exist and are encrypted, the encryption key is working! ✅
 **Solution:**
 - This usually means the key changed or is different between functions
 - Make sure ALL functions have the SAME `TOKEN_ENCRYPTION_KEY` value
-- The key should be: `4ecb38472d72c06982b56f08fad67efff2a26e15b2cf35bce0c399a36c99967c`
+- The key should be a 64-character hexadecimal string (32 bytes)
+- Generate a new key: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+- **Never use keys from documentation or commit them to version control!**
 
 ### Issue: YouTube connection fails silently
 

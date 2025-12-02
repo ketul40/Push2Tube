@@ -7,7 +7,22 @@
 PROJECT_ID="push2tube"  # Change this to your actual project ID if different
 REGION="us-central1"
 ENV_VAR_NAME="TOKEN_ENCRYPTION_KEY"
-ENV_VAR_VALUE="4ecb38472d72c06982b56f08fad67efff2a26e15b2cf35bce0c399a36c99967c"
+
+# SECURITY: Never hardcode encryption keys in scripts!
+# Read from environment variable or prompt user
+if [ -z "$TOKEN_ENCRYPTION_KEY" ]; then
+  echo "ERROR: TOKEN_ENCRYPTION_KEY environment variable is not set"
+  echo ""
+  echo "Please set it before running this script:"
+  echo "  export TOKEN_ENCRYPTION_KEY='your-key-here'"
+  echo "  ./scripts/set-env-vars.sh"
+  echo ""
+  echo "Or generate a new key:"
+  echo "  node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+  exit 1
+fi
+
+ENV_VAR_VALUE="$TOKEN_ENCRYPTION_KEY"
 
 # List of all functions
 FUNCTIONS=(
@@ -102,7 +117,7 @@ if [ $FAILED -gt 0 ]; then
   echo "1. Go to https://console.cloud.google.com/functions"
   echo "2. Click on each failed function"
   echo "3. Click 'Edit' → 'Runtime environment variables' → 'Add variable'"
-  echo "4. Add: $ENV_VAR_NAME = $ENV_VAR_VALUE"
+  echo "4. Add: $ENV_VAR_NAME = [your encryption key]"
   exit 1
 else
   echo ""
