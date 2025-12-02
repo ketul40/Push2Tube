@@ -56,23 +56,41 @@ const Dashboard: React.FC = () => {
       return;
     }
     
+    let isInitialLoad = true;
+    
     const unsubscribe = onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
         // Create or update user document in Firestore
         try {
+          console.log('🔄 Creating/updating user document...', {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName
+          });
+          
           await createOrUpdateUser(
             currentUser.uid,
             currentUser.email || '',
             currentUser.displayName || 'User'
           );
-          console.log('✅ User document created/updated in Firestore');
+          
+          console.log('✅ User document created/updated in Firestore successfully');
         } catch (error) {
-          console.error('Error creating/updating user document:', error);
+          console.error('❌ Error creating/updating user document:', error);
+          console.error('Error details:', {
+            message: error instanceof Error ? error.message : String(error),
+            code: (error as any)?.code,
+            stack: error instanceof Error ? error.stack : undefined
+          });
           // Don't block the UI if this fails
         }
+      } else {
+        console.log('ℹ️ No authenticated user');
       }
+      
       setUser(currentUser);
       setLoading(false);
+      isInitialLoad = false;
     });
 
     return () => unsubscribe();

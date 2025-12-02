@@ -13,74 +13,90 @@ export async function createOrUpdateUser(
   email: string,
   displayName: string
 ): Promise<User> {
+  console.log('📝 createOrUpdateUser called', { uid, email, displayName });
+  
   const userRef = doc(db, 'users', uid);
-  const userSnap = await getDoc(userRef);
+  
+  try {
+    const userSnap = await getDoc(userRef);
+    const now = new Date();
 
-  const now = new Date();
+    if (userSnap.exists()) {
+      console.log('📝 User document exists, updating...');
+      // Update existing user
+      await updateDoc(userRef, {
+        email,
+        displayName,
+        lastLoginAt: serverTimestamp(),
+      });
 
-  if (userSnap.exists()) {
-    // Update existing user
-    await updateDoc(userRef, {
-      email,
-      displayName,
-      lastLoginAt: serverTimestamp(),
+      const updatedSnap = await getDoc(userRef);
+      const data = updatedSnap.data();
+      
+      console.log('✅ User document updated successfully');
+      return {
+        uid: data!.uid,
+        email: data!.email,
+        displayName: data!.displayName,
+        youtubeConnected: data!.youtubeConnected,
+        youtubeChannelId: data?.youtubeChannelId,
+        oauthRefreshToken: data?.oauthRefreshToken,
+        oauthAccessToken: data?.oauthAccessToken,
+        oauthExpiresAt: data?.oauthExpiresAt,
+        defaultPrivacyStatus: data!.defaultPrivacyStatus,
+        createdAt: data!.createdAt.toDate(),
+        lastLoginAt: now,
+        subscriptionPlan: (data?.subscriptionPlan as SubscriptionPlan) || SubscriptionPlan.FREE,
+        subscriptionStatus: (data?.subscriptionStatus as SubscriptionStatus) || SubscriptionStatus.NONE,
+        stripeCustomerId: data?.stripeCustomerId,
+        stripeSubscriptionId: data?.stripeSubscriptionId,
+        currentPeriodStart: data?.currentPeriodStart?.toDate(),
+        currentPeriodEnd: data?.currentPeriodEnd?.toDate(),
+        videosUsedThisMonth: data?.videosUsedThisMonth || 0,
+        videoQuota: data?.videoQuota || 2,
+      };
+    } else {
+      console.log('📝 User document does not exist, creating new...');
+      // Create new user
+      const newUser = {
+        uid,
+        email,
+        displayName,
+        youtubeConnected: false,
+        defaultPrivacyStatus: 'unlisted',
+        createdAt: serverTimestamp(),
+        lastLoginAt: serverTimestamp(),
+        subscriptionPlan: SubscriptionPlan.FREE,
+        subscriptionStatus: SubscriptionStatus.NONE,
+        videosUsedThisMonth: 0,
+        videoQuota: 2,
+      };
+
+      await setDoc(userRef, newUser);
+      console.log('✅ User document created successfully');
+
+      return {
+        uid,
+        email,
+        displayName,
+        youtubeConnected: false,
+        defaultPrivacyStatus: 'unlisted',
+        createdAt: now,
+        lastLoginAt: now,
+        subscriptionPlan: SubscriptionPlan.FREE,
+        subscriptionStatus: SubscriptionStatus.NONE,
+        videosUsedThisMonth: 0,
+        videoQuota: 2,
+      };
+    }
+  } catch (error) {
+    console.error('❌ Error in createOrUpdateUser:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : String(error),
+      code: (error as any)?.code,
+      stack: error instanceof Error ? error.stack : undefined
     });
-
-    const updatedSnap = await getDoc(userRef);
-    const data = updatedSnap.data();
-    
-    return {
-      uid: data!.uid,
-      email: data!.email,
-      displayName: data!.displayName,
-      youtubeConnected: data!.youtubeConnected,
-      youtubeChannelId: data?.youtubeChannelId,
-      oauthRefreshToken: data?.oauthRefreshToken,
-      oauthAccessToken: data?.oauthAccessToken,
-      oauthExpiresAt: data?.oauthExpiresAt,
-      defaultPrivacyStatus: data!.defaultPrivacyStatus,
-      createdAt: data!.createdAt.toDate(),
-      lastLoginAt: now,
-      subscriptionPlan: (data?.subscriptionPlan as SubscriptionPlan) || SubscriptionPlan.FREE,
-      subscriptionStatus: (data?.subscriptionStatus as SubscriptionStatus) || SubscriptionStatus.NONE,
-      stripeCustomerId: data?.stripeCustomerId,
-      stripeSubscriptionId: data?.stripeSubscriptionId,
-      currentPeriodStart: data?.currentPeriodStart?.toDate(),
-      currentPeriodEnd: data?.currentPeriodEnd?.toDate(),
-      videosUsedThisMonth: data?.videosUsedThisMonth || 0,
-      videoQuota: data?.videoQuota || 2,
-    };
-  } else {
-    // Create new user
-    const newUser = {
-      uid,
-      email,
-      displayName,
-      youtubeConnected: false,
-      defaultPrivacyStatus: 'unlisted',
-      createdAt: serverTimestamp(),
-      lastLoginAt: serverTimestamp(),
-      subscriptionPlan: SubscriptionPlan.FREE,
-      subscriptionStatus: SubscriptionStatus.NONE,
-      videosUsedThisMonth: 0,
-      videoQuota: 2,
-    };
-
-    await setDoc(userRef, newUser);
-
-    return {
-      uid,
-      email,
-      displayName,
-      youtubeConnected: false,
-      defaultPrivacyStatus: 'unlisted',
-      createdAt: now,
-      lastLoginAt: now,
-      subscriptionPlan: SubscriptionPlan.FREE,
-      subscriptionStatus: SubscriptionStatus.NONE,
-      videosUsedThisMonth: 0,
-      videoQuota: 2,
-    };
+    throw error;
   }
 }
 
